@@ -71,48 +71,15 @@ document.addEventListener('DOMContentLoaded', () => {
         '设置': {
             title: '【 系统设置 】',
             html: () => `
-                <div class="accordion">
-                    <!-- 折叠项 1：AI 引擎配置 -->
-                    <div class="accordion-item expanded">
-                        <div class="accordion-header">
-                            <span>✧ AI 引擎配置</span>
-                            <span class="acc-icon">▼</span>
-                        </div>
-                        <div class="accordion-content">
-                            <div class="form-group">
-                                <label>API 地址 (Base URL)</label>
-                                <input type="text" id="setting-api-url" class="classical-input" value="${window.GameData.api.url}" placeholder="例如: https://api.openai.com/v1">
-                            </div>
-                            <div class="form-group">
-                                <label>API 密钥 (API Key)</label>
-                                <input type="password" id="setting-api-key" class="classical-input" value="${window.GameData.api.key}" placeholder="输入密钥 sk-...">
-                            </div>
-                            <div class="form-group" style="flex-direction: row; justify-content: space-between; align-items: center;">
-                                <label style="margin-bottom:0;">AI 模型</label>
-                                <button class="action-btn" id="btn-fetch-models">获取模型</button>
-                            </div>
-                            <div class="form-group">
-                                <select id="setting-api-model" class="classical-select">
-                                    ${window.GameData.api.model ? `<option value="${window.GameData.api.model}">${window.GameData.api.model}</option>` : '<option value="">(请先获取模型或手动输入)</option>'}
-                                    ${window.GameData.api.availableModels.map(m => m !== window.GameData.api.model ? `<option value="${m}">${m}</option>` : '').join('')}
-                                </select>
-                            </div>
-                            <!-- 允许用户手动输入模型覆盖下拉框 -->
-                            <div class="form-group">
-                                <label>或手动输入模型名:</label>
-                                <input type="text" id="setting-api-model-manual" class="classical-input" value="${window.GameData.api.model}" placeholder="例如: gpt-3.5-turbo">
-                            </div>
-                            <button class="action-btn" id="btn-save-ai-settings" style="width:100%; margin-top:5px; padding:10px;">💾 封存引擎设置</button>
-                        </div>
-                    </div>
-
-                    <!-- 折叠项 2：音画与系统体验 -->
+                <div class="accordion-container">
+                    
+                    <!-- 游戏基础设置 -->
                     <div class="accordion-item">
                         <div class="accordion-header">
-                            <span>✧ 音画与系统体验</span>
-                            <span class="acc-icon">▼</span>
+                            <span>🎵 基础设置</span>
+                            <span class="accordion-icon">▼</span>
                         </div>
-                        <div class="accordion-content">
+                        <div class="accordion-body">
                             <div class="list-layout">
                                 <div class="list-item">
                                     <span>背景音乐</span>
@@ -129,84 +96,100 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         </div>
                     </div>
+
+                    <!-- AI API 设置 -->
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <span>⚙️ AI 核心接口配置</span>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-body">
+                            <div class="form-group">
+                                <label>API 地址 (Base URL)</label>
+                                <input type="text" id="setting-api-url" class="classical-input" value="${window.GameData.api.url}" placeholder="例如: https://api.openai.com/v1">
+                            </div>
+                            <div class="form-group">
+                                <label>API 密钥 (API Key)</label>
+                                <input type="password" id="setting-api-key" class="classical-input" value="${window.GameData.api.key}" placeholder="输入密钥 sk-...">
+                            </div>
+                            <div class="form-group" style="flex-direction: row; justify-content: space-between; align-items: center;">
+                                <label style="margin-bottom:0;">AI 模型</label>
+                                <button class="action-btn" id="btn-fetch-models">请求获取模型</button>
+                            </div>
+                            <div class="form-group">
+                                <select id="setting-api-model" class="classical-select">
+                                    ${window.GameData.api.model ? `<option value="${window.GameData.api.model}">${window.GameData.api.model}</option>` : '<option value="">(请先获取模型)</option>'}
+                                    ${window.GameData.api.availableModels.map(m => m !== window.GameData.api.model ? `<option value="${m}">${m}</option>` : '').join('')}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
                 </div>
+                <button class="action-btn" id="btn-save-settings" style="width:100%; margin-top:15px; padding:10px;">💾 封存所有设置</button>
             `,
             afterRender: () => {
-                // 绑定折叠面板逻辑
+                // 手风琴折叠逻辑
                 const headers = document.querySelectorAll('.accordion-header');
                 headers.forEach(header => {
                     header.addEventListener('click', () => {
                         const item = header.parentElement;
-                        // 切换当前点击的项
-                        item.classList.toggle('expanded');
+                        // 关闭其他项 (可选，如果希望只能展开一个的话)
+                        // document.querySelectorAll('.accordion-item').forEach(i => {
+                        //    if(i !== item) i.classList.remove('open');
+                        // });
+                        item.classList.toggle('open');
                     });
                 });
 
-                // 真实请求获取模型列表
+                // 真实的 Fetch 获取模型逻辑
                 document.getElementById('btn-fetch-models').onclick = async () => {
-                    const urlInput = document.getElementById('setting-api-url').value;
-                    const keyInput = document.getElementById('setting-api-key').value;
-                    if (!urlInput || !keyInput) {
-                        showToast('请先输入完整的 API 地址与密钥');
+                    const tempUrl = document.getElementById('setting-api-url').value.trim();
+                    const tempKey = document.getElementById('setting-api-key').value.trim();
+                    
+                    if (!tempUrl || !tempKey) {
+                        showToast('请先输入完整的 API 地址与密钥！');
                         return;
                     }
 
-                    showToast('正在链接天地法则...');
-                    const btn = document.getElementById('btn-fetch-models');
-                    btn.disabled = true;
-                    btn.textContent = '获取中...';
-
+                    showToast('正在链接天地法则(获取模型)...');
                     try {
-                        let fetchUrl = urlInput.replace(/\/$/, '') + '/models';
-                        // 如果用户输入了包含 /chat/completions 的路径，做个截断处理
-                        if(fetchUrl.includes('/chat/completions')) {
-                            fetchUrl = fetchUrl.replace('/chat/completions', '/models');
-                        }
-
-                        const response = await fetch(fetchUrl, {
+                        const res = await fetch(`${tempUrl}/models`, {
                             method: 'GET',
-                            headers: {
-                                'Authorization': \`Bearer \${keyInput}\`
-                            }
+                            headers: { 'Authorization': `Bearer ${tempKey}` }
                         });
-
-                        if (!response.ok) throw new Error('网络请求失败');
-                        const data = await response.json();
                         
+                        const data = await res.json();
                         if (data && data.data && Array.isArray(data.data)) {
+                            // 提取模型 ID 列表
                             window.GameData.api.availableModels = data.data.map(m => m.id);
-                            // 渲染至 select
+                            if(!window.GameData.api.model || !window.GameData.api.availableModels.includes(window.GameData.api.model)) {
+                                window.GameData.api.model = window.GameData.api.availableModels[0]; // 默认选中第一个
+                            }
+                            
+                            // 更新下拉框
                             const select = document.getElementById('setting-api-model');
                             select.innerHTML = window.GameData.api.availableModels.map(m => 
-                                \`<option value="\${m}">\${m}</option>\`
+                                `<option value="${m}" ${m === window.GameData.api.model ? 'selected' : ''}>${m}</option>`
                             ).join('');
-                            showToast('模型已同步就绪');
+                            
+                            showToast('获取模型成功，天道已就绪！');
                         } else {
-                            throw new Error('返回数据格式不正确');
+                            showToast('获取模型失败: ' + (data.error?.message || '返回数据格式不正确'));
                         }
                     } catch (error) {
+                        showToast('网络请求失败，请检查 URL 或跨域配置');
                         console.error('Fetch Models Error:', error);
-                        showToast('获取失败，请检查地址或网络跨域设置');
-                    } finally {
-                        btn.disabled = false;
-                        btn.textContent = '获取模型';
                     }
                 };
 
-                // 当 select 变动时，同步更新手动输入框
-                const selectEl = document.getElementById('setting-api-model');
-                const manualEl = document.getElementById('setting-api-model-manual');
-                selectEl.addEventListener('change', () => {
-                    manualEl.value = selectEl.value;
-                });
-
                 // 保存设置
-                document.getElementById('btn-save-ai-settings').onclick = () => {
-                    window.GameData.api.url = document.getElementById('setting-api-url').value;
-                    window.GameData.api.key = document.getElementById('setting-api-key').value;
-                    // 以 manual 的值为准，因为它允许用户自定义
-                    window.GameData.api.model = document.getElementById('setting-api-model-manual').value || document.getElementById('setting-api-model').value;
+                document.getElementById('btn-save-settings').onclick = () => {
+                    window.GameData.api.url = document.getElementById('setting-api-url').value.trim();
+                    window.GameData.api.key = document.getElementById('setting-api-key').value.trim();
+                    window.GameData.api.model = document.getElementById('setting-api-model').value.trim();
                     showToast('设置已保存，天道流转已重置。');
+                    closeModal();
                 };
             }
         },
@@ -215,8 +198,8 @@ document.addEventListener('DOMContentLoaded', () => {
             html: () => `
                 <div class="list-layout">
                     <div class="form-group">
-                        <label>角色背景与性格设定 (传递给 AI)</label>
-                        <textarea id="user-prompt" class="classical-textarea" rows="8" placeholder="在此书写你的人生起点...">${window.GameData.user.prompt}</textarea>
+                        <label>角色背景与推演祈愿 (传递给 AI)</label>
+                        <textarea id="user-prompt" class="classical-textarea" rows="8" placeholder="在此书写你的人生起点或当前愿望...">${window.GameData.user.prompt}</textarea>
                     </div>
                     <button class="action-btn" id="btn-save-user" style="width:100%; padding:10px;">✍️ 确认命格</button>
                 </div>
@@ -234,11 +217,11 @@ document.addEventListener('DOMContentLoaded', () => {
             html: () => `
                 <div class="text-center">
                     <p style="font-size:18px;font-weight:bold;margin-bottom:10px;">准备推演下一年</p>
-                    <p style="margin-bottom:15px;color:#8b7456;font-size:13px;">将请求 AI 引擎，根据当前命格进行剧情推演...</p>
+                    <p style="margin-bottom:15px;color:#8b7456;font-size:13px;">将根据你当前设定的命格与状态交由 AI 进行推演...</p>
                     <div class="list-layout" style="text-align:left; font-size:12px; background:rgba(0,0,0,0.02); padding:10px; border-radius:4px; border:1px dashed #d3c1a8;">
                         <div><strong>接口:</strong> ${window.GameData.api.url || '未配置'}</div>
                         <div><strong>模型:</strong> ${window.GameData.api.model || '未配置'}</div>
-                        <div><strong>设定:</strong> ${window.GameData.user.prompt.substring(0, 15)}...</div>
+                        <div style="margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>设定:</strong> ${window.GameData.user.prompt}</div>
                     </div>
                     <button class="action-btn" id="btn-trigger-ai" style="margin-top:20px; width:100%; padding:12px; background:#c25b4e; font-size:15px;">🔮 拨动命运之轮</button>
                 </div>
@@ -246,68 +229,61 @@ document.addEventListener('DOMContentLoaded', () => {
             afterRender: () => {
                 document.getElementById('btn-trigger-ai').onclick = async () => {
                     if (!window.GameData.api.key || !window.GameData.api.url || !window.GameData.api.model) {
-                        showToast('天道枯竭！请先在【设置】中配置完整的 URL、Key 与模型。');
+                        showToast('天道残缺！请先在【设置】中配置完整的 API 信息与模型。');
                         return;
                     }
                     
-                    showToast('命运之轮开始转动...');
+                    showToast('命运之轮转动... 正在进行推演');
                     closeModal();
 
+                    // 在右侧面板加入 Loading 效果
                     const rightPanelContent = document.querySelector('.right-panel .panel-content');
                     if (rightPanelContent) {
-                        rightPanelContent.innerHTML = `<p class="fade-text" style="text-align:center; margin-top:20px;">📜 天机推演中，请稍候...</p>`;
+                        rightPanelContent.innerHTML = `<p class="fade-text" style="text-align:center; margin-top:20px;">AI 正在拨动命盘，推演未来，请稍候...</p>`;
                     }
 
+                    // 真实的 Chat Completion 请求
                     try {
-                        let endpoint = window.GameData.api.url;
-                        if(!endpoint.endsWith('/chat/completions')) {
-                            endpoint = endpoint.replace(/\/$/, '') + '/chat/completions';
-                        }
-
-                        const response = await fetch(endpoint, {
+                        const response = await fetch(`${window.GameData.api.url}/chat/completions`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'Authorization': \`Bearer \${window.GameData.api.key}\`
+                                'Authorization': `Bearer ${window.GameData.api.key}`
                             },
                             body: JSON.stringify({
                                 model: window.GameData.api.model,
                                 messages: [
                                     {
-                                        role: 'system',
-                                        content: '你是一个沙盒人生模拟器的文字剧情引擎。基于玩家当前的设定，请推演他接下来一年的遭遇。请使用古典、精炼、文学性的口吻，字数控制在150字以内。'
+                                        role: "system",
+                                        content: "你是一个古代人生模拟器的文字引擎。你需要根据用户的背景设定，以第二人称（你）的视角，输出他新的一年中发生的重要遭遇。文本要求：古风修辞，字数适中（不要超过200字），并且分段叙述。不要带有格式化Markdown符号。"
                                     },
                                     {
-                                        role: 'user',
+                                        role: "user",
                                         content: window.GameData.user.prompt
                                     }
                                 ]
                             })
                         });
 
-                        if (!response.ok) {
-                            const errData = await response.json().catch(()=>({}));
-                            throw new Error(errData.error?.message || '请求被拒绝');
+                        const data = await response.json();
+                        
+                        if (data.choices && data.choices[0]) {
+                            showToast('推演完成！');
+                            let aiText = data.choices[0].message.content;
+                            // 将换行符转为段落标签以适配 HTML 展示
+                            const formattedHtml = aiText.split('\n').filter(p => p.trim() !== '').map(p => `<p>${p}</p>`).join('');
+                            
+                            if (rightPanelContent) {
+                                rightPanelContent.innerHTML = formattedHtml + `<p class="fade-text" style="margin-top:15px;">岁月流转，前方迷雾重重，诸事尚未落定...</p>`;
+                            }
+                        } else {
+                            showToast('AI 推演异常: ' + (data.error?.message || '未知数据结构'));
+                            if (rightPanelContent) rightPanelContent.innerHTML = `<p style="color:#c25b4e;">推演受阻，天道反噬...</p>`;
                         }
-
-                        const result = await response.json();
-                        const aiMessage = result.choices[0].message.content;
-
-                        if (rightPanelContent) {
-                            rightPanelContent.innerHTML = \`
-                                <p style="font-weight:bold; color:#5c4a3d;">【 最新岁记 】</p>
-                                <p>\${aiMessage.replace(/\\n/g, '<br>')}</p>
-                                <p class="fade-text" style="margin-top:15px;">岁月流转，前方迷雾重重...</p>
-                            \`;
-                        }
-                        showToast('推演完成！');
-
                     } catch (error) {
+                        showToast('网络请求失败，请检查 API 配置或网络');
                         console.error('AI Request Error:', error);
-                        showToast('推演失败：' + error.message);
-                        if (rightPanelContent) {
-                            rightPanelContent.innerHTML = \`<p class="fade-text" style="color:#c25b4e !important;">天道反噬，推演中止。（原因：\${error.message}）</p>\`;
-                        }
+                        if (rightPanelContent) rightPanelContent.innerHTML = `<p style="color:#c25b4e;">网络中断，推演终止。</p>`;
                     }
                 };
             }
@@ -326,6 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
             html: () => `
                 <div class="list-layout">
                     <div class="list-item"><span style="font-weight:bold;">娘亲的家书</span><span style="color:#c25b4e;font-size:12px;">未读</span></div>
+                    <div class="list-item"><span>王二狗的借条</span><span style="color:#999;font-size:12px;">已读</span></div>
                 </div>
             `
         },
@@ -333,7 +310,9 @@ document.addEventListener('DOMContentLoaded', () => {
             title: '【 人脉交游 】',
             html: () => `
                 <div class="list-layout">
+                    <div class="list-item"><span>老村长</span><span>好感: 30</span></div>
                     <div class="list-item"><span>私塾先生</span><span>好感: 10</span></div>
+                    <div class="list-item"><span>神秘乞丐</span><span style="color:#c25b4e;">好感: -50 (交恶)</span></div>
                 </div>
             `
         },
@@ -344,6 +323,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="grid-cell" style="background:#eaddc7;color:#5c4a3d;">自家</div>
                     <div class="grid-cell">市集</div>
                     <div class="grid-cell">私塾</div>
+                    <div class="grid-cell">医馆</div>
+                    <div class="grid-cell">破庙</div>
+                    <div class="grid-cell">后山</div>
                 </div>
             `
         },
@@ -354,6 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="list-item" style="border-left: 3px solid #c25b4e;">
                         <div style="display:flex;flex-direction:column;">
                             <span style="font-weight:bold;">[主线] 逆天改命</span>
+                            <span style="font-size:12px;color:#666;margin-top:4px;">前往私塾偷听讲学 (0/1)</span>
                         </div>
                     </div>
                 </div>
@@ -364,7 +347,9 @@ document.addEventListener('DOMContentLoaded', () => {
             html: () => `
                 <div class="list-layout">
                     <div class="list-item"><span>健康上限</span><button class="action-btn">+10</button></div>
+                    <div class="list-item"><span>盘缠金钱</span><button class="action-btn">+1000</button></div>
                 </div>
+                <div style="margin-top:10px;text-align:center;font-size:12px;color:#c25b4e;">过度微调可能影响天道平衡</div>
             `
         },
         '存档': {
@@ -374,6 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="list-item">
                         <div style="display:flex;flex-direction:column;">
                             <span style="font-weight:bold;">位面 壹</span>
+                            <span style="font-size:12px;color:#666;">景泰三年 春 / 张三</span>
                         </div>
                         <button class="action-btn">覆盖</button>
                     </div>
@@ -387,6 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="list-item">
                         <div style="display:flex;flex-direction:column;">
                             <span style="font-weight:bold;">位面 壹</span>
+                            <span style="font-size:12px;color:#666;">景泰三年 春 / 张三</span>
                         </div>
                         <button class="action-btn">读取</button>
                     </div>
@@ -397,6 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
             title: '【 轮回转世 】',
             html: () => `
                 <div class="text-center">
+                    <p>天道无常，生死轮回。</p>
                     <p style="color:#c25b4e;margin:10px 0;">是否要放弃当前的人生，重新投胎？</p>
                     <button class="action-btn" style="background:#c25b4e;margin-top:10px;padding:8px 20px;">确认转世</button>
                 </div>
@@ -408,6 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="list-layout">
                     <div style="font-size:13px;line-height:1.6;color:#4a3c31;">
                         <p>[系统] 游戏初始化完成。</p>
+                        <p>[系统] 景泰二年 夏：邻里逢旱，随父母逃荒。</p>
                     </div>
                 </div>
             `
@@ -463,7 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(toast);
         setTimeout(() => {
             if (document.body.contains(toast)) toast.remove();
-        }, 2500);
+        }, 2000);
     }
 
     if (!document.getElementById('toast-style')) {

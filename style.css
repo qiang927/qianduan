@@ -424,7 +424,6 @@ html, body {
     transition: background 0.1s;
 }
 .action-btn:active { background: #4a3c31; }
-.action-btn:disabled { background: #999; cursor: not-allowed; }
 
 .text-center { text-align: center; font-size: 14px; line-height: 1.6; }
 
@@ -468,53 +467,51 @@ html, body {
 }
 
 /* =========================================================
-   折叠面板样式 (Accordion)
+   新增：手风琴折叠菜单 (Accordion)
    ========================================================= */
-.accordion {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
 .accordion-item {
     border: 1px solid #d3c1a8;
     border-radius: 4px;
+    margin-bottom: 10px;
+    background: rgba(0,0,0,0.02);
     overflow: hidden;
 }
 
 .accordion-header {
-    background: #eaddc7;
-    padding: 10px 12px;
-    font-weight: bold;
-    color: #5c4a3d;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 12px;
+    background: rgba(234, 221, 199, 0.4);
     cursor: pointer;
+    font-weight: bold;
+    color: #5c4a3d;
     font-size: 14px;
+    transition: background 0.2s;
 }
+.accordion-header:active { background: rgba(234, 221, 199, 0.8); }
 
-.accordion-header:active {
-    background: #d3c1a8;
-}
-
-.acc-icon {
+.accordion-icon {
     font-size: 12px;
-    transition: transform 0.2s;
+    transition: transform 0.3s;
+    color: #8b7456;
 }
 
-.accordion-content {
-    background: rgba(255, 255, 255, 0.4);
-    padding: 15px;
-    display: none; /* 默认隐藏 */
-    flex-direction: column;
+.accordion-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    padding: 0 12px;
+    border-top: 1px solid transparent;
 }
 
-.accordion-item.expanded .accordion-content {
-    display: flex; /* 展开时显示 */
+.accordion-item.open .accordion-body {
+    max-height: 500px; /* 足够的高度即可 */
+    padding: 12px;
+    border-top-color: #d3c1a8;
 }
 
-.accordion-item.expanded .acc-icon {
+.accordion-item.open .accordion-icon {
     transform: rotate(180deg);
 }
 
