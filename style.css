@@ -174,7 +174,7 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 12px; 
+    gap: 12px;
     max-width: 50vw;
 }
 
@@ -201,7 +201,7 @@ html, body {
 
 .system-btns {
     display: flex;
-    flex-direction: column; 
+    flex-direction: column;
     gap: 12px;
 }
 
@@ -332,9 +332,9 @@ html, body {
 }
 
 .modal-box {
-    width: 80%;
-    max-width: 360px;
-    max-height: 75vh;
+    width: 85%;
+    max-width: 400px; /* 稍微放大一点以容纳表单 */
+    max-height: 80vh; 
     background: #fbf6ec; 
     border: 2px solid #8b7456;
     border-radius: 8px;
@@ -384,6 +384,8 @@ html, body {
     overflow-y: auto;
     flex: 1;
     color: #4a3c31;
+    /* 允许文本框等正常响应用户选择 */
+    user-select: text;
 }
 
 /* 弹窗内部通用布局：列表式 */
@@ -431,51 +433,48 @@ html, body {
     border: none;
     padding: 5px 12px;
     border-radius: 4px;
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
 }
 .action-btn:active { background: #4a3c31; }
 
 .text-center { text-align: center; font-size: 14px; line-height: 1.6; }
 
-/* ======== 表单元素古典风格定制 ======== */
-.custom-input, .custom-select, .custom-textarea {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.6);
-    border: 1px solid #a58f72;
-    border-radius: 4px;
-    padding: 8px 10px;
-    color: #4a3c31;
-    font-family: inherit;
-    font-size: 13px;
-    outline: none;
-    transition: all 0.2s;
-    user-select: auto;
-}
-
-.custom-input::placeholder, .custom-textarea::placeholder {
-    color: #b09e86;
-}
-
-.custom-input:focus, .custom-select:focus, .custom-textarea:focus {
-    border-color: #c25b4e;
-    background: #fff;
-    box-shadow: 0 0 5px rgba(194, 91, 78, 0.2);
-}
-
-.custom-textarea {
-    resize: vertical;
-    min-height: 100px;
-    line-height: 1.5;
-}
-
-.api-group {
+/* =========================================================
+   表单与输入框样式 (AI驱动相关)
+   ========================================================= */
+.input-group {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 5px;
-    padding-top: 15px;
-    border-top: 1px dashed #d3c1a8;
+    gap: 6px;
+    margin-bottom: 12px;
+    text-align: left;
+}
+.input-group label {
+    font-size: 13px;
+    color: #5c4a3d;
+    font-weight: bold;
+}
+.form-input, .form-textarea, .form-select {
+    width: 100%;
+    background: rgba(0,0,0,0.03);
+    border: 1px solid #d3c1a8;
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 14px;
+    color: #4a3c31;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s;
+}
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+    border-color: #c25b4e;
+    background: rgba(255,255,255,0.6);
+    box-shadow: 0 0 5px rgba(194,91,78,0.2);
+}
+.form-textarea {
+    resize: vertical;
+    line-height: 1.6;
 }
 
 /* 大屏设备微调 */
