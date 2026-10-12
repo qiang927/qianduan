@@ -10,8 +10,13 @@ window.GameData = {
         prompt: '你出生在一个贫寒的农家，虽身体虚弱，但你渴望通过努力改变命运。请推演我下一年的遭遇。'
     },
     world: {
-        worldbook: '',
-        systemPreset: '你是一个古代人生模拟器的文字引擎。你需要根据用户的背景设定，以第二人称（你）的视角，输出他新的一年中发生的重要遭遇。文本要求：古风修辞，字数适中（不要超过200字），并且分段叙述。不要带有格式化Markdown符号。'
+        preset: {
+            system: '你是一个古代人生模拟器的文字引擎。你需要根据用户的背景设定，以第二人称（你）的视角，输出他新的一年中发生的重要遭遇。',
+            postHistory: '文本要求：古风修辞，字数适中（不要超过200字），并且分段叙述。不要带有格式化Markdown符号。'
+        },
+        worldbook: [
+            { keys: '大旱,饥荒', content: '当今天下大旱，庄稼绝收，饿殍遍野，难民纷纷涌向京城。', alwaysOn: false }
+        ]
     }
 };
 
@@ -231,25 +236,114 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         '微调': {
             title: '【 世界书与预设 (Lore & Presets) 】',
-            html: () => `
-                <div class="list-layout">
-                    <div class="form-group">
-                        <label>预设指令 (System Prompt)</label>
-                        <textarea id="setting-system-preset" class="classical-textarea" rows="6" placeholder="定义AI的行为与规则...">${window.GameData.world.systemPreset}</textarea>
+            html: () => {
+                const p = window.GameData.world.preset;
+                const wb = window.GameData.world.worldbook;
+
+                let wbHtml = wb.map((entry) => `
+                    <div class="wb-entry">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <input type="text" class="classical-input wb-keys" value="${entry.keys}" placeholder="触发词 (用逗号分隔)" style="flex:1; margin-right:10px;">
+                            <button class="action-btn wb-del" style="background:#c25b4e; padding:4px 8px;">删</button>
+                        </div>
+                        <textarea class="classical-textarea wb-content" rows="3" placeholder="世界观、传闻或设定内容...">${entry.content}</textarea>
+                        <label style="font-size:12px; display:flex; align-items:center; gap:5px; margin-top:5px;">
+                            <input type="checkbox" class="wb-always" ${entry.alwaysOn ? 'checked' : ''}> 始终激活 (Constant/Always On)
+                        </label>
                     </div>
-                    <div class="form-group">
-                        <label>世界书 / 世界观背景 (Worldbook)</label>
-                        <textarea id="setting-worldbook" class="classical-textarea" rows="6" placeholder="例如：当今天下大旱，朝廷腐败，妖魔横行。京城被叛军占领...">${window.GameData.world.worldbook}</textarea>
+                `).join('');
+
+                return `
+                    <div class="tabs-container" style="display:flex; flex-direction:column;">
+                        
+                        <!-- 预设页面 (Presets) -->
+                        <div id="view-preset" class="tab-content active" style="max-height:50vh; overflow-y:auto; padding-right:5px;">
+                            <div class="form-group">
+                                <label>System Prompt (核心扮演预设)</label>
+                                <textarea id="preset-system" class="classical-textarea" rows="6" placeholder="定义AI的行为与基础规则...">${p.system}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Post-History Instructions (后缀/防越狱指令)</label>
+                                <textarea id="preset-post" class="classical-textarea" rows="4" placeholder="放在Prompt最后，用于强化格式或限制...">${p.postHistory}</textarea>
+                            </div>
+                            <button class="action-btn" id="btn-save-preset" style="width:100%; padding:10px; margin-top:10px;">💾 封存预设设定</button>
+                        </div>
+
+                        <!-- 世界书页面 (Worldbook) -->
+                        <div id="view-worldbook" class="tab-content" style="display:none; max-height:50vh; overflow-y:auto; padding-right:5px;">
+                            <div id="wb-list">${wbHtml}</div>
+                            <button class="action-btn" id="btn-add-wb" style="width:100%; margin-top:10px;">+ 新增世界书条目</button>
+                            <button class="action-btn" id="btn-save-wb" style="width:100%; margin-top:10px; background:#c25b4e;">💾 封存世界书内容</button>
+                        </div>
+
+                        <!-- 底部并列的切换按钮 -->
+                        <div class="modal-tabs-nav">
+                            <button class="tab-btn active" data-target="view-preset">预设配置</button>
+                            <button class="tab-btn" data-target="view-worldbook">世界书 (Lore)</button>
+                        </div>
+
                     </div>
-                    <button class="action-btn" id="btn-save-world" style="width:100%; padding:10px;">💾 封存世界法则</button>
-                </div>
-            `,
+                `;
+            },
             afterRender: () => {
-                document.getElementById('btn-save-world').onclick = () => {
-                    window.GameData.world.systemPreset = document.getElementById('setting-system-preset').value;
-                    window.GameData.world.worldbook = document.getElementById('setting-worldbook').value;
-                    showToast('世界法则已更新。');
-                    closeModal();
+                // 1. 切换页签逻辑
+                const tabBtns = document.querySelectorAll('.tab-btn');
+                const tabContents = document.querySelectorAll('.tab-content');
+
+                tabBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        // 移除所有激活状态
+                        tabBtns.forEach(b => b.classList.remove('active'));
+                        tabContents.forEach(c => c.style.display = 'none');
+                        // 激活当前
+                        btn.classList.add('active');
+                        document.getElementById(btn.dataset.target).style.display = 'block';
+                    });
+                });
+
+                // 2. 预设封存逻辑
+                document.getElementById('btn-save-preset').onclick = () => {
+                    window.GameData.world.preset.system = document.getElementById('preset-system').value;
+                    window.GameData.world.preset.postHistory = document.getElementById('preset-post').value;
+                    showToast('核心预设已封存。');
+                };
+
+                // 3. 世界书新增/删除/封存逻辑
+                const wbList = document.getElementById('wb-list');
+                
+                document.getElementById('btn-add-wb').onclick = () => {
+                    const div = document.createElement('div');
+                    div.className = 'wb-entry';
+                    div.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <input type="text" class="classical-input wb-keys" value="" placeholder="触发词 (用逗号分隔)" style="flex:1; margin-right:10px;">
+                            <button class="action-btn wb-del" style="background:#c25b4e; padding:4px 8px;">删</button>
+                        </div>
+                        <textarea class="classical-textarea wb-content" rows="3" placeholder="世界观、传闻或设定内容..."></textarea>
+                        <label style="font-size:12px; display:flex; align-items:center; gap:5px; margin-top:5px;">
+                            <input type="checkbox" class="wb-always"> 始终激活 (Constant/Always On)
+                        </label>
+                    `;
+                    wbList.appendChild(div);
+                };
+
+                wbList.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('wb-del')) {
+                        e.target.closest('.wb-entry').remove();
+                    }
+                });
+
+                document.getElementById('btn-save-wb').onclick = () => {
+                    const entries = [];
+                    wbList.querySelectorAll('.wb-entry').forEach(el => {
+                        entries.push({
+                            keys: el.querySelector('.wb-keys').value.trim(),
+                            content: el.querySelector('.wb-content').value.trim(),
+                            alwaysOn: el.querySelector('.wb-always').checked
+                        });
+                    });
+                    window.GameData.world.worldbook = entries;
+                    showToast('世界书条目已封存。');
                 };
             }
         },
@@ -261,8 +355,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p style="margin-bottom:15px;color:#8b7456;font-size:13px;">将根据你当前设定的命格与状态交由 AI 进行推演...</p>
                     <div class="list-layout" style="text-align:left; font-size:12px; background:rgba(0,0,0,0.02); padding:10px; border-radius:4px; border:1px dashed #d3c1a8;">
                         <div><strong>模型:</strong> ${window.GameData.api.model || '未配置'}</div>
-                        <div><strong>世界书:</strong> ${window.GameData.world.worldbook ? '已启用' : '未配置'}</div>
-                        <div style="margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>设定:</strong> ${window.GameData.user.prompt}</div>
+                        <div><strong>激活的世界书条目:</strong> 动态匹配</div>
+                        <div style="margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>推演祈愿:</strong> ${window.GameData.user.prompt}</div>
                     </div>
                     <button class="action-btn" id="btn-trigger-ai" style="margin-top:20px; width:100%; padding:12px; background:#c25b4e; font-size:15px;">🔮 拨动命运之轮</button>
                 </div>
@@ -283,10 +377,29 @@ document.addEventListener('DOMContentLoaded', () => {
                         rightPanelContent.innerHTML = `<p class="fade-text" style="text-align:center; margin-top:20px;">AI 正在拨动命盘，推演未来，请稍候...</p>`;
                     }
 
-                    // 组合 System Prompt 和 Worldbook
-                    let finalSystemContent = window.GameData.world.systemPreset;
-                    if (window.GameData.world.worldbook) {
-                        finalSystemContent += `\n\n【世界背景/传闻】\n${window.GameData.world.worldbook}`;
+                    // 组合 SillyTavern 风格的 Prompt
+                    let activeLore = [];
+                    const textToScan = window.GameData.user.prompt; // 实际游玩中应包含最近的对话历史
+                    
+                    // 扫描世界书条目
+                    window.GameData.world.worldbook.forEach(entry => {
+                        if (entry.alwaysOn) {
+                            activeLore.push(entry.content);
+                        } else if (entry.keys) {
+                            const keywords = entry.keys.split(',').map(k => k.trim()).filter(k => k);
+                            const triggered = keywords.some(k => textToScan.includes(k));
+                            if (triggered) {
+                                activeLore.push(entry.content);
+                            }
+                        }
+                    });
+
+                    let finalSystemContent = window.GameData.world.preset.system;
+                    if (activeLore.length > 0) {
+                        finalSystemContent += `\n\n【世界背景/传闻 (Worldbook)】\n${activeLore.join('\n')}`;
+                    }
+                    if (window.GameData.world.preset.postHistory) {
+                        finalSystemContent += `\n\n【系统附加指令】\n${window.GameData.world.preset.postHistory}`;
                     }
 
                     // 真实的 Chat Completion 请求
