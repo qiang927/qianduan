@@ -394,10 +394,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
 
-                    let finalSystemContent = window.GameData.world.preset.system;
+                    // 组合发送给 AI 的 System Prompt (按照: 角色设定 + 预设 + 世界书 的顺序)
+                    let finalSystemContent = `【角色设定】\n${window.GameData.user.prompt}`;
+                    
+                    if (window.GameData.world.preset.system) {
+                        finalSystemContent += `\n\n【核心预设】\n${window.GameData.world.preset.system}`;
+                    }
+
                     if (activeLore.length > 0) {
                         finalSystemContent += `\n\n【世界背景/传闻 (Worldbook)】\n${activeLore.join('\n')}`;
                     }
+                    
                     if (window.GameData.world.preset.postHistory) {
                         finalSystemContent += `\n\n【系统附加指令】\n${window.GameData.world.preset.postHistory}`;
                     }
@@ -419,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     },
                                     {
                                         role: "user",
-                                        content: window.GameData.user.prompt
+                                        content: "请推演我下一年的遭遇。"
                                     }
                                 ]
                             })
