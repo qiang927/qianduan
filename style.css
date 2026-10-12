@@ -134,6 +134,23 @@ html, body {
     box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
+/* --- 顶部中间：时间显示 --- */
+.top-center {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    padding: 6px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    z-index: 10;
+    white-space: nowrap;
+}
+
 /* --- 顶部左侧 --- */
 .top-left {
     position: absolute;
