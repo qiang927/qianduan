@@ -21,7 +21,7 @@ html, body {
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-/* 3D/图文 背景区 - 纯内容，无边框，直接铺在纸张上 */
+/* 3D/图文 背景区 */
 .background-area {
     position: absolute;
     top: 0;
@@ -31,16 +31,13 @@ html, body {
     background-color: #eaddc7;
     background-image: radial-gradient(#d3c1a8 1px, transparent 1px);
     background-size: 20px 20px;
-    
     display: flex;
     flex-direction: row;
-    /* 给四周的UI按钮留出充足的空白间距，防止文字被遮挡 */
     padding: 90px 65px 110px 65px; 
     box-sizing: border-box;
     z-index: 1;
 }
 
-/* 左右分栏面板 */
 .history-panel {
     flex: 1;
     display: flex;
@@ -49,12 +46,8 @@ html, body {
     padding: 0 10px;
 }
 
-/* 隐藏滚动条让视觉更干净 */
-.history-panel::-webkit-scrollbar {
-    display: none;
-}
+.history-panel::-webkit-scrollbar { display: none; }
 
-/* 中间渐变分割线 */
 .divider {
     width: 1px;
     background: linear-gradient(to bottom, transparent, #a58f72, transparent);
@@ -102,9 +95,7 @@ html, body {
     pointer-events: none;
 }
 
-.ui-layer > * {
-    pointer-events: auto;
-}
+.ui-layer > * { pointer-events: auto; }
 
 /* 通用按钮样式 */
 .icon-btn, .main-btn, .huge-btn {
@@ -138,7 +129,9 @@ html, body {
     padding: 4px 12px 4px 4px;
     color: #fff;
     max-width: 45vw;
+    cursor: pointer; /* 增加点击提示 */
 }
+.top-left:active { transform: scale(0.96); }
 
 .player-avatar {
     width: 40px;
@@ -181,7 +174,7 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 8px;
+    gap: 12px; /* 增加与系统按钮的间距 */
     max-width: 50vw;
 }
 
@@ -204,13 +197,12 @@ html, body {
     white-space: nowrap;
 }
 
-.res-icon {
-    color: #ffde59;
-}
+.res-icon { color: #ffde59; }
 
 .system-btns {
     display: flex;
-    gap: 10px;
+    flex-direction: column; /* 背包在上，信件在下 */
+    gap: 12px;
 }
 
 .system-btns .icon-btn {
@@ -221,7 +213,7 @@ html, body {
 /* --- 左侧边栏 --- */
 .left-sidebar {
     position: absolute;
-    top: 80px;
+    top: 90px;
     left: 15px;
     display: flex;
     flex-direction: column;
@@ -316,9 +308,134 @@ html, body {
     pointer-events: auto;
 }
 
-.long-btn:active {
-    transform: scale(0.96);
+.long-btn:active { transform: scale(0.96); }
+
+/* =========================================================
+   自定义弹窗样式 (不占满全屏，古典质感)
+   ========================================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
 }
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-box {
+    width: 80%;
+    max-width: 360px; /* 控制最大宽度，不占满全屏 */
+    max-height: 70vh; /* 控制最大高度，留出空间 */
+    background: #fbf6ec; /* 泛黄纸张色 */
+    border: 2px solid #8b7456;
+    border-radius: 8px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.9);
+    transition: transform 0.2s ease-in-out;
+    position: relative;
+}
+
+.modal-overlay.active .modal-box {
+    transform: scale(1);
+}
+
+.modal-header {
+    background: #eaddc7;
+    border-bottom: 2px solid #8b7456;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    position: relative;
+}
+
+.modal-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #5c4a3d;
+    letter-spacing: 2px;
+}
+
+.modal-close {
+    position: absolute;
+    right: 15px;
+    font-size: 24px;
+    color: #8b7456;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-content {
+    padding: 15px;
+    overflow-y: auto;
+    flex: 1;
+    color: #4a3c31;
+}
+
+/* 弹窗内部通用布局：列表式 (用于人际/任务/日志等) */
+.list-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.list-item {
+    background: rgba(0,0,0,0.03);
+    border: 1px solid #d3c1a8;
+    padding: 10px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+/* 弹窗内部通用布局：网格区 (用于背包/地图) */
+.grid-layout {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.grid-cell {
+    aspect-ratio: 1;
+    background: rgba(0,0,0,0.04);
+    border: 1px dashed #a58f72;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    color: #8b7456;
+    cursor: pointer;
+}
+
+/* 设置与微调区的特殊元素 */
+.action-btn {
+    background: #5c4a3d;
+    color: #fbf6ec;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.action-btn:active { background: #4a3c31; }
+
+.text-center { text-align: center; font-size: 14px; line-height: 1.6; }
 
 /* 大屏设备微调 */
 @media screen and (min-width: 768px) {

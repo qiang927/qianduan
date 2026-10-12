@@ -64,9 +64,10 @@
                         <span class="res-value">85</span>
                     </div>
                 </div>
+                <!-- 调整：信件在背包下面，使用列布局 -->
                 <div class="system-btns">
-                    <div class="icon-btn">信件</div>
                     <div class="icon-btn">背包</div>
+                    <div class="icon-btn">信件</div>
                 </div>
             </div>
 
@@ -100,6 +101,20 @@
 
         </div>
     </div>
+
+    <!-- 弹窗遮罩与容器 (默认隐藏) -->
+    <div class="modal-overlay" id="custom-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span class="modal-title" id="modal-title">标题</span>
+                <div class="modal-close" id="modal-close">×</div>
+            </div>
+            <div class="modal-content" id="modal-content-body">
+                <!-- 弹窗内容通过 JS 动态注入 -->
+            </div>
+        </div>
+    </div>
+
     <script src="main.js"></script>
 </body>
 </html>
