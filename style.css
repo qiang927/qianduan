@@ -174,7 +174,7 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 12px;
+    gap: 12px; 
     max-width: 50vw;
 }
 
@@ -201,7 +201,7 @@ html, body {
 
 .system-btns {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; 
     gap: 12px;
 }
 
@@ -311,7 +311,7 @@ html, body {
 .long-btn:active { transform: scale(0.96); }
 
 /* =========================================================
-   自定义弹窗样式 (不占满全屏，古典质感)
+   自定义弹窗样式 
    ========================================================= */
 .modal-overlay {
     position: fixed;
@@ -332,9 +332,9 @@ html, body {
 }
 
 .modal-box {
-    width: 85%;
-    max-width: 360px; 
-    max-height: 75vh; 
+    width: 80%;
+    max-width: 360px;
+    max-height: 75vh;
     background: #fbf6ec; 
     border: 2px solid #8b7456;
     border-radius: 8px;
@@ -385,8 +385,6 @@ html, body {
     flex: 1;
     color: #4a3c31;
 }
-/* 隐藏弹窗滚动条 */
-.modal-content::-webkit-scrollbar { display: none; }
 
 /* 弹窗内部通用布局：列表式 */
 .list-layout {
@@ -426,61 +424,58 @@ html, body {
     cursor: pointer;
 }
 
-/* 按钮及交互元素 */
+/* 设置与微调区的特殊元素 */
 .action-btn {
     background: #5c4a3d;
     color: #fbf6ec;
     border: none;
-    padding: 6px 14px;
+    padding: 5px 12px;
     border-radius: 4px;
     font-size: 13px;
     cursor: pointer;
-    pointer-events: auto !important;
 }
 .action-btn:active { background: #4a3c31; }
 
 .text-center { text-align: center; font-size: 14px; line-height: 1.6; }
 
-/* =========================================================
-   表单与输入框样式 (AI设置与角色设定)
-   ========================================================= */
-.form-group {
-    margin-bottom: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    text-align: left;
-}
-
-.form-group label {
-    font-size: 13px;
-    font-weight: bold;
-    color: #5c4a3d;
-}
-
-.modal-input, .modal-textarea, .modal-select {
+/* ======== 表单元素古典风格定制 ======== */
+.custom-input, .custom-select, .custom-textarea {
     width: 100%;
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid #d3c1a8;
-    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid #a58f72;
     border-radius: 4px;
-    font-family: inherit;
+    padding: 8px 10px;
     color: #4a3c31;
+    font-family: inherit;
     font-size: 13px;
     outline: none;
-    transition: border-color 0.2s;
-    pointer-events: auto !important;
+    transition: all 0.2s;
+    user-select: auto;
 }
 
-.modal-input:focus, .modal-textarea:focus, .modal-select:focus {
-    border-color: #8b7456;
+.custom-input::placeholder, .custom-textarea::placeholder {
+    color: #b09e86;
+}
+
+.custom-input:focus, .custom-select:focus, .custom-textarea:focus {
+    border-color: #c25b4e;
     background: #fff;
+    box-shadow: 0 0 5px rgba(194, 91, 78, 0.2);
 }
 
-.modal-textarea {
+.custom-textarea {
     resize: vertical;
-    min-height: 80px;
+    min-height: 100px;
     line-height: 1.5;
+}
+
+.api-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 5px;
+    padding-top: 15px;
+    border-top: 1px dashed #d3c1a8;
 }
 
 /* 大屏设备微调 */
