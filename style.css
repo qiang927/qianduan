@@ -3,14 +3,14 @@
     padding: 0;
     box-sizing: border-box;
     user-select: none;
-    -webkit-tap-highlight-color: transparent; /* 去除手机端点击高亮 */
+    -webkit-tap-highlight-color: transparent;
 }
 
 html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-family: "PingFang SC", "Microsoft YaHei", serif; /* 增加 serif 增加古风感 */
     background-color: #000;
 }
 
@@ -18,29 +18,108 @@ html, body {
     position: relative;
     width: 100vw;
     height: 100vh;
-    /* 适配全面屏刘海 */
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-/* 3D 背景区 */
+/* 3D/图文 背景区 - 改为古风/现代通用卷轴行程面板 */
 .background-area {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+    background-color: #eaddc7; /* 古典纸张底色 */
+    background-image: radial-gradient(#d3c1a8 1px, transparent 1px);
+    background-size: 20px 20px;
     display: flex;
     justify-content: center;
     align-items: center;
-    color: #fff;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
     z-index: 1;
 }
 
-.background-area h1 {
-    font-size: 1.5rem;
-    text-align: center;
+/* 模拟《长公主的日常》行程面板 */
+.schedule-board {
+    width: 85%;
+    max-width: 500px;
+    height: 65%;
+    background: #fbf6ec; /* 偏白纸色 */
+    border: 2px solid #8b7456; /* 深棕色边框 */
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    margin-top: 10px;
+}
+
+.schedule-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-bottom: 2px dashed #d3c1a8;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.sh-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #5c4a3d;
+    letter-spacing: 2px;
+}
+
+.sh-subtitle {
+    font-size: 14px;
+    color: #8b7456;
+    margin-top: 5px;
+}
+
+.schedule-content {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-right: 5px;
+}
+
+.time-slot {
+    display: flex;
+    align-items: stretch;
+    gap: 12px;
+}
+
+.time-label {
+    writing-mode: vertical-lr; /* 竖排文字 */
+    color: #8b7456;
+    font-weight: bold;
+    font-size: 15px;
+    letter-spacing: 4px;
+    border-right: 1px solid #d3c1a8;
+    padding-right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-box {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #d3c1a8;
+    padding: 15px;
+    border-radius: 6px;
+    font-size: 15px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.02);
+}
+
+.empty-box {
+    background: rgba(255,255,255,0.5);
+    color: #999;
+    font-style: italic;
+    border-style: dashed;
 }
 
 /* UI 交互层 */
@@ -185,19 +264,18 @@ html, body {
     height: 42px;
 }
 
-/* --- 右侧主菜单 (已改为收纳态) --- */
+/* --- 右侧主菜单 --- */
 .right-menu {
     position: absolute;
-    bottom: 125px; /* 在主线按钮正上方 */
-    right: 23px; /* 微调与主线按钮对齐居中 */
+    bottom: 110px;
+    right: 20px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    /* 初始隐藏动画状态 */
     opacity: 0;
     transform: translateY(40px) scale(0.6);
     transform-origin: bottom center;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 增加一点Q弹回弹效果 */
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     pointer-events: none;
     z-index: 5;
 }
@@ -209,41 +287,41 @@ html, body {
 }
 
 .right-menu .main-btn {
-    width: 52px;
-    height: 52px;
-    background: rgba(255, 240, 245, 0.95);
-    color: #d1568f;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #5c4a3d; /* 匹配主题 */
     font-size: 13px;
     box-shadow: 0 3px 8px rgba(0,0,0,0.3);
 }
 
-/* --- 右下角主线 --- */
+/* --- 右下角：收纳开关 --- */
 .bottom-right {
     position: absolute;
-    bottom: 40px; /* 往上挪，脱离屏幕边缘 */
+    bottom: 40px;
     right: 15px;
     z-index: 10;
 }
 
 .huge-btn {
-    width: 70px;
-    height: 70px;
-    background: radial-gradient(circle, #ff9a9e 0%, #fecfef 100%);
-    color: #fff;
+    width: 60px;
+    height: 60px;
+    background: #5c4a3d; /* 深色主题按钮 */
+    color: #fbf6ec;
     font-size: 15px;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    box-shadow: 0 4px 10px rgba(255,154,158,0.5);
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(92,74,61,0.5);
 }
 
-/* --- 底部栏：社交与聊天 --- */
+/* --- 底部栏：下一年长条按钮 --- */
 .bottom-left {
     position: absolute;
-    bottom: 40px; /* 和主线按钮水平对齐，也上移 */
+    bottom: 40px;
     left: 15px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    max-width: calc(100vw - 110px);
+    gap: 15px;
+    width: calc(100vw - 110px); /* 给右侧收纳按钮留出空间 */
 }
 
 .bottom-left .icon-btn {
@@ -251,33 +329,39 @@ html, body {
     height: 42px;
 }
 
-.chat-box {
-    background: rgba(0, 0, 0, 0.5);
-    padding: 8px 12px;
-    border-radius: 20px;
-    color: #fff;
-    font-size: 12px;
+.long-btn {
     flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    height: 46px;
+    background: #c25b4e; /* 典雅的朱红色，突出推进时间 */
+    color: #fff;
+    border-radius: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    box-shadow: 0 3px 8px rgba(194,91,78,0.4);
     cursor: pointer;
+    transition: transform 0.1s;
+    pointer-events: auto;
 }
 
-/* 大屏设备 (平板/桌面) 适配微调 */
+.long-btn:active {
+    transform: scale(0.96);
+}
+
+/* 大屏设备微调 */
 @media screen and (min-width: 768px) {
-    .background-area h1 { font-size: 2rem; }
-    .icon-btn { font-size: 14px; }
+    .schedule-board { height: 75%; padding: 30px; }
+    .sh-title { font-size: 24px; }
+    .action-box { font-size: 16px; }
     .player-avatar { width: 50px; height: 50px; }
-    .player-name { font-size: 16px; }
-    .resource-item { font-size: 14px; padding: 5px 15px; }
-    .system-btns .icon-btn { width: 44px; height: 44px; }
-    .left-sidebar .icon-btn { width: 50px; height: 50px; gap: 15px; }
-    .right-menu { bottom: 145px; right: 33px; }
-    .right-menu .main-btn { width: 64px; height: 64px; font-size: 14px; gap: 15px;}
+    .right-menu { bottom: 130px; right: 25px; }
+    .right-menu .main-btn { width: 60px; height: 60px; font-size: 14px; gap: 15px;}
     .bottom-right { bottom: 40px; right: 20px; }
-    .huge-btn { width: 90px; height: 90px; font-size: 18px; }
-    .bottom-left { bottom: 40px; left: 20px; }
+    .huge-btn { width: 70px; height: 70px; font-size: 18px; }
+    .bottom-left { bottom: 40px; left: 20px; gap: 20px;}
     .bottom-left .icon-btn { width: 50px; height: 50px; }
-    .chat-box { font-size: 14px; padding: 10px 20px; }
+    .long-btn { height: 56px; font-size: 18px; }
 }

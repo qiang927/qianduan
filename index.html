@@ -8,9 +8,32 @@
 </head>
 <body>
     <div class="game-container">
-        <!-- 场景/文字沙盒世界展示区 (占位) -->
+        <!-- 背景布局：参考《长公主的日常》行程安排界面 -->
         <div class="background-area">
-            <h1>🌍 现代/古代世界模拟进行中... 🌍</h1>
+            <div class="schedule-board">
+                <div class="schedule-header">
+                    <span class="sh-title">【 本月行程安排 】</span>
+                    <span class="sh-subtitle">景泰三年 春</span>
+                </div>
+                <div class="schedule-content">
+                    <div class="time-slot">
+                        <span class="time-label">清晨</span>
+                        <div class="action-box">去往 私塾 读书</div>
+                    </div>
+                    <div class="time-slot">
+                        <span class="time-label">午后</span>
+                        <div class="action-box">拜访 张府</div>
+                    </div>
+                    <div class="time-slot">
+                        <span class="time-label">傍晚</span>
+                        <div class="action-box empty-box">点击安排行程...</div>
+                    </div>
+                    <div class="time-slot">
+                        <span class="time-label">深夜</span>
+                        <div class="action-box empty-box">就寝休息...</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- UI 交互层 -->
@@ -64,15 +87,15 @@
                 <div class="main-btn">重生</div>
             </div>
 
-            <!-- 底部栏：人生轨迹与事件日志 -->
+            <!-- 底部栏：原来是系统日志，现改为下一年长条按钮 -->
             <div class="bottom-left">
                 <div class="icon-btn">日志</div>
-                <div class="chat-box">系统：新的一年开始了，你感觉精力充沛。</div>
+                <div class="long-btn">下一年</div>
             </div>
 
-            <!-- 右下角：时间推进 -->
+            <!-- 右下角：收纳开关 -->
             <div class="bottom-right">
-                <div class="huge-btn">下一年</div>
+                <div class="huge-btn" id="toggle-menu-btn">展开</div>
             </div>
 
         </div>
