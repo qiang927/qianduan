@@ -7,7 +7,7 @@ window.GameData = {
         availableModels: []
     },
     user: {
-        prompt: '你出生在一个贫寒的农家，虽身体虚弱，但你渴望通过努力改变命运。请推演我下一年的遭遇。'
+        prompt: '你出生在一个贫寒的农家，虽身体虚弱，但你渴望通过努力改变命运。'
     },
     world: {
         preset: {
@@ -17,11 +17,22 @@ window.GameData = {
         worldbook: [
             { keys: '大旱,饥荒', content: '当今天下大旱，庄稼绝收，饿殍遍野，难民纷纷涌向京城。', alwaysOn: false }
         ]
-    }
+    },
+    time: { era: '景泰', year: 3, month: 1, day: 1 },
+    timeStep: 'year' // 'year', 'month', 'day'
 };
+
+function updateTimeDisplay() {
+    const td = document.getElementById('top-time-display');
+    if (td) {
+        td.textContent = `${window.GameData.time.era}${window.GameData.time.year}年 ${window.GameData.time.month}月 ${window.GameData.time.day}日`;
+    }
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     
+    updateTimeDisplay();
+
     // 1. 收纳按钮展开/收起逻辑
     const toggleMenuBtn = document.getElementById('toggle-menu-btn');
     const rightMenu = document.querySelector('.right-menu');
@@ -347,118 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             }
         },
-        '下一年': {
-            title: '【 岁末交替 】',
-            html: () => `
-                <div class="text-center">
-                    <p style="font-size:18px;font-weight:bold;margin-bottom:10px;">准备推演下一年</p>
-                    <p style="margin-bottom:15px;color:#8b7456;font-size:13px;">将根据你当前设定的命格与状态交由 AI 进行推演...</p>
-                    <div class="list-layout" style="text-align:left; font-size:12px; background:rgba(0,0,0,0.02); padding:10px; border-radius:4px; border:1px dashed #d3c1a8;">
-                        <div><strong>模型:</strong> ${window.GameData.api.model || '未配置'}</div>
-                        <div><strong>激活的世界书条目:</strong> 动态匹配</div>
-                        <div style="margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>推演祈愿:</strong> ${window.GameData.user.prompt}</div>
-                    </div>
-                    <button class="action-btn" id="btn-trigger-ai" style="margin-top:20px; width:100%; padding:12px; background:#c25b4e; font-size:15px;">🔮 拨动命运之轮</button>
-                </div>
-            `,
-            afterRender: () => {
-                document.getElementById('btn-trigger-ai').onclick = async () => {
-                    if (!window.GameData.api.key || !window.GameData.api.url || !window.GameData.api.model) {
-                        showToast('天道残缺！请先在【设置】中配置完整的 API 信息与模型。');
-                        return;
-                    }
-                    
-                    showToast('命运之轮转动... 正在进行推演');
-                    closeModal();
-
-                    // 在右侧面板加入 Loading 效果
-                    const rightPanelContent = document.querySelector('.right-panel .panel-content');
-                    if (rightPanelContent) {
-                        rightPanelContent.innerHTML = `<p class="fade-text" style="text-align:center; margin-top:20px;">AI 正在拨动命盘，推演未来，请稍候...</p>`;
-                    }
-
-                    // 组合 SillyTavern 风格的 Prompt
-                    let activeLore = [];
-                    const textToScan = window.GameData.user.prompt; // 实际游玩中应包含最近的对话历史
-                    
-                    // 扫描世界书条目
-                    window.GameData.world.worldbook.forEach(entry => {
-                        if (entry.alwaysOn) {
-                            activeLore.push(entry.content);
-                        } else if (entry.keys) {
-                            const keywords = entry.keys.split(',').map(k => k.trim()).filter(k => k);
-                            const triggered = keywords.some(k => textToScan.includes(k));
-                            if (triggered) {
-                                activeLore.push(entry.content);
-                            }
-                        }
-                    });
-
-                    // 组合发送给 AI 的 System Prompt (按照: 角色设定 + 预设 + 世界书 的顺序)
-                    let finalSystemContent = `【角色设定】\n${window.GameData.user.prompt}`;
-                    
-                    if (window.GameData.world.preset.system) {
-                        finalSystemContent += `\n\n【核心预设】\n${window.GameData.world.preset.system}`;
-                    }
-
-                    if (activeLore.length > 0) {
-                        finalSystemContent += `\n\n【世界背景/传闻 (Worldbook)】\n${activeLore.join('\n')}`;
-                    }
-                    
-                    if (window.GameData.world.preset.postHistory) {
-                        finalSystemContent += `\n\n【系统附加指令】\n${window.GameData.world.preset.postHistory}`;
-                    }
-
-                    // 真实的 Chat Completion 请求
-                    try {
-                        const response = await fetch(`${window.GameData.api.url}/chat/completions`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${window.GameData.api.key}`
-                            },
-                            body: JSON.stringify({
-                                model: window.GameData.api.model,
-                                messages: [
-                                    {
-                                        role: "system",
-                                        content: finalSystemContent
-                                    },
-                                    {
-                                        role: "user",
-                                        content: "请推演我下一年的遭遇。"
-                                    }
-                                ]
-                            })
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-
-                        const data = await response.json();
-                        
-                        if (data.choices && data.choices[0]) {
-                            showToast('推演完成！');
-                            let aiText = data.choices[0].message.content;
-                            // 将换行符转为段落标签以适配 HTML 展示
-                            const formattedHtml = aiText.split('\n').filter(p => p.trim() !== '').map(p => `<p>${p}</p>`).join('');
-                            
-                            if (rightPanelContent) {
-                                rightPanelContent.innerHTML = formattedHtml + `<p class="fade-text" style="margin-top:15px;">岁月流转，前方迷雾重重，诸事尚未落定...</p>`;
-                            }
-                        } else {
-                            showToast('AI 推演异常: ' + (data.error?.message || '未知数据结构'));
-                            if (rightPanelContent) rightPanelContent.innerHTML = `<p style="color:#c25b4e;">推演受阻，天道反噬...</p>`;
-                        }
-                    } catch (error) {
-                        showToast('网络请求失败，请检查 API 配置或网络');
-                        console.error('AI Request Error:', error);
-                        if (rightPanelContent) rightPanelContent.innerHTML = `<p style="color:#c25b4e;">网络中断，推演终止。</p>`;
-                    }
-                };
-            }
-        },
+    // （移除旧的下一年逻辑）
         '背包': {
             title: '【 我的行囊 】',
             html: () => `
@@ -564,8 +464,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // 4. 绑定所有按钮的点击事件
-    const allButtons = document.querySelectorAll('.icon-btn, .main-btn, .long-btn');
+    // 4. 绑定通用按钮的点击事件 (排除长条推进按钮)
+    const allButtons = document.querySelectorAll('.icon-btn, .main-btn');
     allButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
             const btnName = e.currentTarget.textContent.trim();
@@ -586,7 +486,192 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 5. 提示框(Toast)逻辑
+    // 5. 下一年(长按与点击)逻辑
+    const longBtn = document.querySelector('.long-btn');
+    let pressTimer = null;
+    let isLongPress = false;
+
+    const startPress = (e) => {
+        if (e.type === 'touchstart' && e.cancelable) {
+            // 移动端处理
+        }
+        isLongPress = false;
+        pressTimer = setTimeout(() => {
+            isLongPress = true;
+            // 触发长按，打开步长切换菜单
+            openModal('【 推进步长切换 】', `
+                <div class="list-layout">
+                    <button class="action-btn time-step-btn" data-step="year">下一年</button>
+                    <button class="action-btn time-step-btn" data-step="month">下一月</button>
+                    <button class="action-btn time-step-btn" data-step="day">下一日</button>
+                </div>
+            `, () => {
+                document.querySelectorAll('.time-step-btn').forEach(b => {
+                    b.onclick = (ev) => {
+                        window.GameData.timeStep = ev.target.dataset.step;
+                        longBtn.textContent = ev.target.textContent;
+                        closeModal();
+                        showToast('推演步长已切换为: ' + ev.target.textContent);
+                    };
+                });
+            });
+        }, 500); // 长按 500ms
+    };
+
+    const cancelPress = () => {
+        if (pressTimer) clearTimeout(pressTimer);
+    };
+
+    if (longBtn) {
+        longBtn.addEventListener('mousedown', startPress);
+        longBtn.addEventListener('touchstart', startPress, {passive: true});
+        longBtn.addEventListener('mouseup', cancelPress);
+        longBtn.addEventListener('mouseleave', cancelPress);
+        longBtn.addEventListener('touchend', cancelPress);
+        
+        longBtn.addEventListener('click', (e) => {
+            if (isLongPress) {
+                e.preventDefault();
+                return;
+            }
+            
+            // 短按，打开推进面板
+            const stepNames = { year: '下一年', month: '下一月', day: '下一日' };
+            const stepText = stepNames[window.GameData.timeStep];
+
+            openModal('【 岁月交替 】', () => `
+                <div class="text-center">
+                    <p style="font-size:18px;font-weight:bold;margin-bottom:10px;">准备推演 ${stepText}</p>
+                    <p style="margin-bottom:15px;color:#8b7456;font-size:13px;">将根据你当前设定的命格与状态交由 AI 进行推演...</p>
+                    <div class="list-layout" style="text-align:left; font-size:12px; background:rgba(0,0,0,0.02); padding:10px; border-radius:4px; border:1px dashed #d3c1a8;">
+                        <div><strong>模型:</strong> ${window.GameData.api.model || '未配置'}</div>
+                        <div><strong>激活的世界书:</strong> 动态匹配</div>
+                        <div style="margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>推演祈愿:</strong> ${window.GameData.user.prompt}</div>
+                    </div>
+                    <button class="action-btn" id="btn-trigger-ai" style="margin-top:20px; width:100%; padding:12px; background:#c25b4e; font-size:15px;">🔮 拨动命运之轮</button>
+                </div>
+            `, () => {
+                document.getElementById('btn-trigger-ai').onclick = async () => {
+                    if (!window.GameData.api.key || !window.GameData.api.url || !window.GameData.api.model) {
+                        showToast('天道残缺！请先在【设置】中配置完整的 API 信息与模型。');
+                        return;
+                    }
+                    
+                    showToast('命运之轮转动... 正在进行推演');
+                    closeModal();
+
+                    const rightPanelContent = document.querySelector('.right-panel .panel-content');
+                    if (rightPanelContent) {
+                        rightPanelContent.innerHTML = \`<p class="fade-text" style="text-align:center; margin-top:20px;">AI 正在拨动命盘，推演未来，请稍候...</p>\`;
+                    }
+
+                    // 计算目标时间
+                    let targetTime = { ...window.GameData.time };
+                    if (GameData.timeStep === 'year') {
+                        targetTime.year++;
+                    } else if (GameData.timeStep === 'month') {
+                        targetTime.month++;
+                        if (targetTime.month > 12) { targetTime.month = 1; targetTime.year++; }
+                    } else if (GameData.timeStep === 'day') {
+                        targetTime.day++;
+                        if (targetTime.day > 30) { targetTime.day = 1; targetTime.month++; }
+                        if (targetTime.month > 12) { targetTime.month = 1; targetTime.year++; }
+                    }
+                    const timeStr = \`\${targetTime.era}\${targetTime.year}年 \${targetTime.month}月 \${targetTime.day}日\`;
+
+                    // 组合 世界书
+                    let activeLore = [];
+                    const textToScan = window.GameData.user.prompt; 
+                    
+                    window.GameData.world.worldbook.forEach(entry => {
+                        if (entry.alwaysOn) {
+                            activeLore.push(entry.content);
+                        } else if (entry.keys) {
+                            const keywords = entry.keys.split(',').map(k => k.trim()).filter(k => k);
+                            const triggered = keywords.some(k => textToScan.includes(k));
+                            if (triggered) {
+                                activeLore.push(entry.content);
+                            }
+                        }
+                    });
+
+                    // 组合 System Prompt
+                    let finalSystemContent = \`【角色设定】\\n\${window.GameData.user.prompt}\\n\\n【即将到达的时间节点】\\n\${timeStr}\`;
+                    
+                    if (window.GameData.world.preset.system) {
+                        finalSystemContent += \`\\n\\n【核心预设】\\n\${window.GameData.world.preset.system}\`;
+                    }
+
+                    if (activeLore.length > 0) {
+                        finalSystemContent += \`\\n\\n【世界背景/传闻 (Worldbook)】\\n\${activeLore.join('\\n')}\`;
+                    }
+                    
+                    if (window.GameData.world.preset.postHistory) {
+                        finalSystemContent += \`\\n\\n【系统附加指令】\\n\${window.GameData.world.preset.postHistory}\`;
+                    }
+
+                    const stepPromptMap = {
+                        year: "请推演我下一年的遭遇。",
+                        month: "请推演我下一月的遭遇。",
+                        day: "请推演我下一日的遭遇。"
+                    };
+
+                    // 真实的 Chat Completion 请求
+                    try {
+                        const response = await fetch(\`\${window.GameData.api.url}/chat/completions\`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': \`Bearer \${window.GameData.api.key}\`
+                            },
+                            body: JSON.stringify({
+                                model: window.GameData.api.model,
+                                messages: [
+                                    {
+                                        role: "system",
+                                        content: finalSystemContent
+                                    },
+                                    {
+                                        role: "user",
+                                        content: stepPromptMap[window.GameData.timeStep]
+                                    }
+                                ]
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(\`HTTP error! status: \${response.status}\`);
+                        }
+
+                        const data = await response.json();
+                        
+                        if (data.choices && data.choices[0]) {
+                            showToast('推演完成！');
+                            // 推演成功，真实更新界面时间
+                            window.GameData.time = targetTime;
+                            updateTimeDisplay();
+
+                            let aiText = data.choices[0].message.content;
+                            const formattedHtml = aiText.split('\\n').filter(p => p.trim() !== '').map(p => \`<p>\${p}</p>\`).join('');
+                            
+                            if (rightPanelContent) {
+                                rightPanelContent.innerHTML = formattedHtml + \`<p class="fade-text" style="margin-top:15px;">岁月流转，前方迷雾重重，诸事尚未落定...</p>\`;
+                            }
+                        } else {
+                            showToast('AI 推演异常: ' + (data.error?.message || '未知数据结构'));
+                            if (rightPanelContent) rightPanelContent.innerHTML = \`<p style="color:#c25b4e;">推演受阻，天道反噬...</p>\`;
+                        }
+                    } catch (error) {
+                        showToast('网络请求失败，请检查 API 配置或网络');
+                        console.error('AI Request Error:', error);
+                        if (rightPanelContent) rightPanelContent.innerHTML = \`<p style="color:#c25b4e;">网络中断，推演终止。</p>\`;
+                    }
+                };
+            });
+        });
+    }
+
+    // 6. 提示框(Toast)逻辑
     function showToast(message) {
         const existingToast = document.querySelector('.toast');
         if (existingToast) existingToast.remove();

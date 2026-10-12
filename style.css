@@ -117,6 +117,23 @@ html, body {
     transform: scale(0.92);
 }
 
+/* --- 顶部中间：时间显示 --- */
+.top-center {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 20px;
+    padding: 6px 16px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
 /* --- 顶部左侧 --- */
 .top-left {
     position: absolute;
@@ -180,9 +197,9 @@ html, body {
 
 .resources-wrapper {
     display: flex;
+    flex-direction: column;
     gap: 8px;
-    flex-wrap: wrap;
-    justify-content: flex-end;
+    align-items: flex-end;
 }
 
 .resource-item {
