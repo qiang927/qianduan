@@ -9,12 +9,9 @@ window.GameData = {
     user: {
         prompt: '你出生在一个贫寒的农家，虽身体虚弱，但你渴望通过努力改变命运。请推演我下一年的遭遇。'
     },
-    lorebook: {
-        entries: [
-            { key: "朝廷", content: "当今朝廷腐败，宦官专权，各地民不聊生。" },
-            { key: "私塾先生", content: "城东的私塾先生姓李，曾是落第秀才，性格古怪但才华横溢。" }
-        ],
-        globalPreset: "这是一个架空的低武历史世界，存在极少数的内功高手。由于连年天灾，底层百姓生活极度艰难。"
+    world: {
+        worldbook: '',
+        systemPreset: '你是一个古代人生模拟器的文字引擎。你需要根据用户的背景设定，以第二人称（你）的视角，输出他新的一年中发生的重要遭遇。文本要求：古风修辞，字数适中（不要超过200字），并且分段叙述。不要带有格式化Markdown符号。'
     }
 };
 
@@ -79,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
             title: '【 系统设置 】',
             html: () => `
                 <div class="accordion-container">
+                    
                     <!-- 游戏基础设置 -->
                     <div class="accordion-item">
                         <div class="accordion-header">
@@ -128,13 +126,14 @@ document.addEventListener('DOMContentLoaded', () => {
                                     ${window.GameData.api.availableModels.map(m => m !== window.GameData.api.model ? `<option value="${m}">${m}</option>` : '').join('')}
                                 </select>
                             </div>
-                            <div style="font-size:12px; color:#8b7456; margin-top:5px; text-align:center;">如果获取失败，可能是存在跨域拦截。</div>
                         </div>
                     </div>
+                    
                 </div>
                 <button class="action-btn" id="btn-save-settings" style="width:100%; margin-top:15px; padding:10px;">💾 封存所有设置</button>
             `,
             afterRender: () => {
+                // 手风琴折叠逻辑
                 const headers = document.querySelectorAll('.accordion-header');
                 headers.forEach(header => {
                     header.addEventListener('click', () => {
@@ -143,6 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 });
 
+                // 真实的 Fetch 获取模型逻辑
                 document.getElementById('btn-fetch-models').onclick = async () => {
                     const tempUrl = document.getElementById('setting-api-url').value.trim();
                     const tempKey = document.getElementById('setting-api-key').value.trim();
@@ -159,15 +159,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             headers: { 'Authorization': `Bearer ${tempKey}` }
                         });
                         
-                        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                        if (!res.ok) {
+                            throw new Error(`HTTP error! status: ${res.status}`);
+                        }
 
                         const data = await res.json();
                         if (data && data.data && Array.isArray(data.data)) {
+                            // 提取模型 ID 列表
                             window.GameData.api.availableModels = data.data.map(m => m.id);
                             if(!window.GameData.api.model || !window.GameData.api.availableModels.includes(window.GameData.api.model)) {
-                                window.GameData.api.model = window.GameData.api.availableModels[0]; 
+                                window.GameData.api.model = window.GameData.api.availableModels[0]; // 默认选中第一个
                             }
                             
+                            // 更新下拉框
                             const select = document.getElementById('setting-api-model');
                             select.innerHTML = window.GameData.api.availableModels.map(m => 
                                 `<option value="${m}" ${m === window.GameData.api.model ? 'selected' : ''}>${m}</option>`
@@ -176,13 +180,15 @@ document.addEventListener('DOMContentLoaded', () => {
                             showToast('获取模型成功，天道已就绪！');
                         } else {
                             showToast('获取模型失败: 返回数据格式不正确');
+                            console.error('Data format error:', data);
                         }
                     } catch (error) {
-                        showToast('网络请求失败，可能是接口不支持前端跨域');
+                        showToast('网络请求失败，请检查 URL 或跨域配置');
                         console.error('Fetch Models Error:', error);
                     }
                 };
 
+                // 保存设置
                 document.getElementById('btn-save-settings').onclick = () => {
                     window.GameData.api.url = document.getElementById('setting-api-url').value.trim();
                     window.GameData.api.key = document.getElementById('setting-api-key').value.trim();
@@ -192,29 +198,71 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             }
         },
-        '我': { 
-            title: '【 个人志 / 我的属性 】',
+        '头像': { 
+            title: '【 个人志 / Prompt设定 】',
+            html: () => `
+                <div class="list-layout">
+                    <div class="form-group">
+                        <label>角色背景与推演祈愿 (User Prompt)</label>
+                        <textarea id="user-prompt" class="classical-textarea" rows="8" placeholder="在此书写你的人生起点或当前愿望...">${window.GameData.user.prompt}</textarea>
+                    </div>
+                    <button class="action-btn" id="btn-save-user" style="width:100%; padding:10px;">✍️ 确认命格</button>
+                </div>
+            `,
+            afterRender: () => {
+                document.getElementById('btn-save-user').onclick = () => {
+                    window.GameData.user.prompt = document.getElementById('user-prompt').value;
+                    showToast('命格已定，天机已录。');
+                    closeModal();
+                };
+            }
+        },
+        '我': {
+            title: '【 个人属性 】',
             html: () => `
                 <div class="list-layout">
                     <div class="list-item"><span>姓名</span><span>平民_张三</span></div>
                     <div class="list-item"><span>骨龄</span><span>18 岁</span></div>
-                    <div class="list-item"><span>体质</span><span>虚弱 (健康上限 100)</span></div>
+                    <div class="list-item"><span>体质</span><span>虚弱</span></div>
                     <div class="list-item"><span>学识</span><span>初识笔墨</span></div>
                     <div class="list-item"><span>名望</span><span>籍籍无名</span></div>
-                    <div class="list-item"><span>盘缠</span><span>5000 钱</span></div>
-                    <div class="list-item"><span>心境</span><span style="color:#2d7d46;">平静 (85/100)</span></div>
                 </div>
             `
+        },
+        '微调': {
+            title: '【 世界书与预设 (Lore & Presets) 】',
+            html: () => `
+                <div class="list-layout">
+                    <div class="form-group">
+                        <label>预设指令 (System Prompt)</label>
+                        <textarea id="setting-system-preset" class="classical-textarea" rows="6" placeholder="定义AI的行为与规则...">${window.GameData.world.systemPreset}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>世界书 / 世界观背景 (Worldbook)</label>
+                        <textarea id="setting-worldbook" class="classical-textarea" rows="6" placeholder="例如：当今天下大旱，朝廷腐败，妖魔横行。京城被叛军占领...">${window.GameData.world.worldbook}</textarea>
+                    </div>
+                    <button class="action-btn" id="btn-save-world" style="width:100%; padding:10px;">💾 封存世界法则</button>
+                </div>
+            `,
+            afterRender: () => {
+                document.getElementById('btn-save-world').onclick = () => {
+                    window.GameData.world.systemPreset = document.getElementById('setting-system-preset').value;
+                    window.GameData.world.worldbook = document.getElementById('setting-worldbook').value;
+                    showToast('世界法则已更新。');
+                    closeModal();
+                };
+            }
         },
         '下一年': {
             title: '【 岁末交替 】',
             html: () => `
                 <div class="text-center">
                     <p style="font-size:18px;font-weight:bold;margin-bottom:10px;">准备推演下一年</p>
-                    <p style="margin-bottom:15px;color:#8b7456;font-size:13px;">将结合【世界书/预设】与【个人命格】交由 AI 进行推演...</p>
+                    <p style="margin-bottom:15px;color:#8b7456;font-size:13px;">将根据你当前设定的命格与状态交由 AI 进行推演...</p>
                     <div class="list-layout" style="text-align:left; font-size:12px; background:rgba(0,0,0,0.02); padding:10px; border-radius:4px; border:1px dashed #d3c1a8;">
-                        <div><strong>接口:</strong> ${window.GameData.api.url || '未配置'}</div>
                         <div><strong>模型:</strong> ${window.GameData.api.model || '未配置'}</div>
+                        <div><strong>世界书:</strong> ${window.GameData.world.worldbook ? '已启用' : '未配置'}</div>
+                        <div style="margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>设定:</strong> ${window.GameData.user.prompt}</div>
                     </div>
                     <button class="action-btn" id="btn-trigger-ai" style="margin-top:20px; width:100%; padding:12px; background:#c25b4e; font-size:15px;">🔮 拨动命运之轮</button>
                 </div>
@@ -229,21 +277,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast('命运之轮转动... 正在进行推演');
                     closeModal();
 
+                    // 在右侧面板加入 Loading 效果
                     const rightPanelContent = document.querySelector('.right-panel .panel-content');
                     if (rightPanelContent) {
                         rightPanelContent.innerHTML = `<p class="fade-text" style="text-align:center; margin-top:20px;">AI 正在拨动命盘，推演未来，请稍候...</p>`;
                     }
 
-                    // 构建系统 Prompt (融合全局预设与世界书)
-                    let systemPrompt = "你是一个古代人生模拟器的文字引擎。你必须遵守以下世界观设定：\n" + window.GameData.lorebook.globalPreset + "\n\n";
-                    if (window.GameData.lorebook.entries.length > 0) {
-                        systemPrompt += "【世界书/词典词条，注意在推演时体现以下背景】：\n";
-                        window.GameData.lorebook.entries.forEach(entry => {
-                            systemPrompt += `关键字[${entry.key}]: ${entry.content}\n`;
-                        });
+                    // 组合 System Prompt 和 Worldbook
+                    let finalSystemContent = window.GameData.world.systemPreset;
+                    if (window.GameData.world.worldbook) {
+                        finalSystemContent += `\n\n【世界背景/传闻】\n${window.GameData.world.worldbook}`;
                     }
-                    systemPrompt += "\n你需要根据用户的个人命格和行动意愿，以第二人称（你）的视角，输出他新的一年中发生的重要遭遇。文本要求：古风修辞，不要超过200字，分段叙述。不要带有Markdown符号。";
 
+                    // 真实的 Chat Completion 请求
                     try {
                         const response = await fetch(`${window.GameData.api.url}/chat/completions`, {
                             method: 'POST',
@@ -254,130 +300,42 @@ document.addEventListener('DOMContentLoaded', () => {
                             body: JSON.stringify({
                                 model: window.GameData.api.model,
                                 messages: [
-                                    { role: "system", content: systemPrompt },
-                                    { role: "user", content: window.GameData.user.prompt }
+                                    {
+                                        role: "system",
+                                        content: finalSystemContent
+                                    },
+                                    {
+                                        role: "user",
+                                        content: window.GameData.user.prompt
+                                    }
                                 ]
                             })
                         });
 
-                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
 
                         const data = await response.json();
+                        
                         if (data.choices && data.choices[0]) {
                             showToast('推演完成！');
                             let aiText = data.choices[0].message.content;
+                            // 将换行符转为段落标签以适配 HTML 展示
                             const formattedHtml = aiText.split('\n').filter(p => p.trim() !== '').map(p => `<p>${p}</p>`).join('');
                             
                             if (rightPanelContent) {
                                 rightPanelContent.innerHTML = formattedHtml + `<p class="fade-text" style="margin-top:15px;">岁月流转，前方迷雾重重，诸事尚未落定...</p>`;
                             }
                         } else {
-                            showToast('AI 推演异常: ' + (data.error?.message || '未知错误'));
+                            showToast('AI 推演异常: ' + (data.error?.message || '未知数据结构'));
                             if (rightPanelContent) rightPanelContent.innerHTML = `<p style="color:#c25b4e;">推演受阻，天道反噬...</p>`;
                         }
                     } catch (error) {
-                        showToast('推演失败，可能是网络或跨域拦截');
+                        showToast('网络请求失败，请检查 API 配置或网络');
                         console.error('AI Request Error:', error);
-                        if (rightPanelContent) rightPanelContent.innerHTML = `<p style="color:#c25b4e;">连接天道(API)失败。</p>`;
+                        if (rightPanelContent) rightPanelContent.innerHTML = `<p style="color:#c25b4e;">网络中断，推演终止。</p>`;
                     }
-                };
-            }
-        },
-        '微调': {
-            title: '【 世界书与全局预设 (Lorebook) 】',
-            html: () => `
-                <div class="accordion-container">
-                    
-                    <div class="accordion-item open">
-                        <div class="accordion-header">
-                            <span>🌍 全局世界观预设 (Global Preset)</span>
-                            <span class="accordion-icon" style="transform: rotate(180deg);">▼</span>
-                        </div>
-                        <div class="accordion-body" style="max-height: 500px; padding: 12px; border-top: 1px solid #d3c1a8;">
-                            <textarea id="lore-global" class="classical-textarea" rows="4" placeholder="例如：这是一个架空的低武历史世界...">${window.GameData.lorebook.globalPreset}</textarea>
-                        </div>
-                    </div>
-
-                    <div class="accordion-item">
-                        <div class="accordion-header">
-                            <span>📖 世界书词条 (Lorebook Entries)</span>
-                            <span class="accordion-icon">▼</span>
-                        </div>
-                        <div class="accordion-body" id="lorebook-entries-container" style="padding-bottom: 0;">
-                            <!-- 动态渲染词条列表 -->
-                        </div>
-                    </div>
-
-                </div>
-                <button class="action-btn" id="btn-add-entry" style="width:100%; margin-top:5px; padding:8px; background:rgba(0,0,0,0.1); color:#5c4a3d; border:1px dashed #5c4a3d;">➕ 新增世界书词条</button>
-                <button class="action-btn" id="btn-save-lorebook" style="width:100%; margin-top:15px; padding:10px;">💾 封存世界设定</button>
-            `,
-            afterRender: () => {
-                const headers = document.querySelectorAll('.accordion-header');
-                headers.forEach(header => {
-                    header.addEventListener('click', () => {
-                        const item = header.parentElement;
-                        item.classList.toggle('open');
-                        const icon = header.querySelector('.accordion-icon');
-                        icon.style.transform = item.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
-                        const body = item.querySelector('.accordion-body');
-                        if (item.classList.contains('open')) {
-                            body.style.maxHeight = '500px';
-                            body.style.padding = '12px';
-                            body.style.borderTop = '1px solid #d3c1a8';
-                        } else {
-                            body.style.maxHeight = '0';
-                            body.style.padding = '0 12px';
-                            body.style.borderTop = '1px solid transparent';
-                        }
-                    });
-                });
-
-                function renderEntries() {
-                    const container = document.getElementById('lorebook-entries-container');
-                    container.innerHTML = window.GameData.lorebook.entries.map((entry, index) => `
-                        <div class="lore-entry" style="margin-bottom:15px; padding-bottom:15px; border-bottom:1px dashed #d3c1a8;">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                                <input type="text" class="classical-input lore-key" data-index="${index}" value="${entry.key}" placeholder="触发关键字" style="width:70%; font-weight:bold;">
-                                <button class="action-btn btn-delete-entry" data-index="${index}" style="background:#c25b4e; padding:4px 8px;">删</button>
-                            </div>
-                            <textarea class="classical-textarea lore-content" data-index="${index}" rows="2" placeholder="设定的详细内容...">${entry.content}</textarea>
-                        </div>
-                    `).join('');
-
-                    document.querySelectorAll('.btn-delete-entry').forEach(btn => {
-                        btn.onclick = (e) => {
-                            const idx = parseInt(e.target.dataset.index);
-                            window.GameData.lorebook.entries.splice(idx, 1);
-                            renderEntries();
-                        };
-                    });
-                    
-                    document.querySelectorAll('.lore-key, .lore-content').forEach(input => {
-                        input.onchange = (e) => {
-                            const idx = parseInt(e.target.dataset.index);
-                            const field = e.target.classList.contains('lore-key') ? 'key' : 'content';
-                            window.GameData.lorebook.entries[idx][field] = e.target.value;
-                        };
-                    });
-                }
-
-                renderEntries();
-
-                document.getElementById('btn-add-entry').onclick = () => {
-                    window.GameData.lorebook.entries.push({ key: "", content: "" });
-                    renderEntries();
-                    // 确保列表容器被展开
-                    const loreItem = document.getElementById('lorebook-entries-container').parentElement;
-                    if(!loreItem.classList.contains('open')) {
-                        loreItem.querySelector('.accordion-header').click();
-                    }
-                };
-
-                document.getElementById('btn-save-lorebook').onclick = () => {
-                    window.GameData.lorebook.globalPreset = document.getElementById('lore-global').value;
-                    showToast('世界设定已被天道铭记。');
-                    closeModal();
                 };
             }
         },
@@ -500,30 +458,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 左上角头像特殊处理 -> 弹出 Prompt 设定
     const topLeft = document.querySelector('.top-left');
     if (topLeft) {
         topLeft.addEventListener('click', () => {
-            const avatarConfig = { 
-                title: '【 个人命格与祈愿 / Prompt设定 】',
-                html: () => `
-                    <div class="list-layout">
-                        <div class="form-group">
-                            <label>角色背景与行动意愿 (传递给 AI)</label>
-                            <textarea id="user-prompt" class="classical-textarea" rows="8" placeholder="在此书写你的人生起点或当前的行动意愿...">${window.GameData.user.prompt}</textarea>
-                        </div>
-                        <button class="action-btn" id="btn-save-user" style="width:100%; padding:10px;">✍️ 确认命格</button>
-                    </div>
-                `,
-                afterRender: () => {
-                    document.getElementById('btn-save-user').onclick = () => {
-                        window.GameData.user.prompt = document.getElementById('user-prompt').value;
-                        showToast('命格已定，天机已录。');
-                        closeModal();
-                    };
-                }
-            };
-            openModal(avatarConfig.title, avatarConfig.html, avatarConfig.afterRender);
+            const config = modalConfigs['头像'];
+            openModal(config.title, config.html, config.afterRender);
         });
     }
 
