@@ -159,6 +159,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             headers: { 'Authorization': `Bearer ${tempKey}` }
                         });
                         
+                        if (!res.ok) {
+                            throw new Error(`HTTP error! status: ${res.status}`);
+                        }
+
                         const data = await res.json();
                         if (data && data.data && Array.isArray(data.data)) {
                             // 提取模型 ID 列表
@@ -175,7 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
                             
                             showToast('获取模型成功，天道已就绪！');
                         } else {
-                            showToast('获取模型失败: ' + (data.error?.message || '返回数据格式不正确'));
+                            showToast('获取模型失败: 返回数据格式不正确');
+                            console.error('Data format error:', data);
                         }
                     } catch (error) {
                         showToast('网络请求失败，请检查 URL 或跨域配置');
@@ -264,6 +269,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                 ]
                             })
                         });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
 
                         const data = await response.json();
                         
