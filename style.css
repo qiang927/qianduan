@@ -3,6 +3,7 @@
     padding: 0;
     box-sizing: border-box;
     user-select: none;
+    -webkit-tap-highlight-color: transparent; /* 去除手机端点击高亮 */
 }
 
 html, body {
@@ -17,6 +18,8 @@ html, body {
     position: relative;
     width: 100vw;
     height: 100vh;
+    /* 适配全面屏刘海 */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 /* 3D 背景区 */
@@ -35,95 +38,126 @@ html, body {
     z-index: 1;
 }
 
+.background-area h1 {
+    font-size: 1.5rem;
+    text-align: center;
+}
+
 /* UI 交互层 */
 .ui-layer {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: env(safe-area-inset-top, 0);
+    left: env(safe-area-inset-left, 0);
+    right: env(safe-area-inset-right, 0);
+    bottom: env(safe-area-inset-bottom, 0);
     z-index: 2;
-    pointer-events: none; /* 让大部分区域可穿透点击到3D区 */
+    pointer-events: none;
 }
 
 .ui-layer > * {
-    pointer-events: auto; /* UI 元素可点击 */
+    pointer-events: auto;
 }
 
 /* 通用按钮样式 */
 .icon-btn, .main-btn, .huge-btn {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.9);
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: bold;
-    color: #555;
+    color: #444;
     transition: transform 0.1s;
+    flex-shrink: 0;
 }
 
 .icon-btn:active, .main-btn:active, .huge-btn:active {
-    transform: scale(0.95);
+    transform: scale(0.92);
 }
 
-/* 顶部左侧：玩家信息 */
+/* --- 顶部左侧 --- */
 .top-left {
     position: absolute;
-    top: 20px;
-    left: 20px;
+    top: 15px;
+    left: 15px;
     display: flex;
     align-items: center;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 30px;
-    padding: 5px 15px 5px 5px;
+    padding: 4px 12px 4px 4px;
     color: #fff;
+    max-width: 45vw; /* 防止与右侧重叠 */
 }
 
 .player-avatar {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     background: #fff;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     color: #333;
-    font-size: 14px;
-    margin-right: 10px;
+    font-size: 12px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.player-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .player-name {
-    font-size: 16px;
+    font-size: 13px;
     font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .player-level {
-    font-size: 12px;
+    font-size: 11px;
     color: #ffde59;
 }
 
-/* 顶部右侧：资源与系统 */
+/* --- 顶部右侧 --- */
 .top-right {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 15px;
+    right: 15px;
     display: flex;
-    align-items: center;
-    gap: 15px;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    max-width: 50vw;
+}
+
+.resources-wrapper {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap; /* 空间不足时折行 */
+    justify-content: flex-end;
 }
 
 .resource-item {
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 20px;
-    padding: 5px 15px;
+    padding: 4px 10px;
     display: flex;
     align-items: center;
     color: #fff;
-    font-size: 14px;
-    gap: 5px;
+    font-size: 11px;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.res-icon {
+    color: #ffde59;
 }
 
 .system-btns {
@@ -132,82 +166,100 @@ html, body {
 }
 
 .system-btns .icon-btn {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
 }
 
-/* 左侧边栏：活动与福利 */
+/* --- 左侧边栏 --- */
 .left-sidebar {
     position: absolute;
-    top: 100px;
-    left: 20px;
+    top: 80px;
+    left: 15px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
 .left-sidebar .icon-btn {
-    width: 50px;
-    height: 50px;
+    width: 42px;
+    height: 42px;
 }
 
-/* 右侧主菜单：主要功能入口 */
+/* --- 右侧主菜单 --- */
 .right-menu {
     position: absolute;
-    bottom: 120px;
-    right: 20px;
+    bottom: 90px;
+    right: 15px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
 .right-menu .main-btn {
-    width: 60px;
-    height: 60px;
-    background: rgba(255, 230, 240, 0.95);
+    width: 52px;
+    height: 52px;
+    background: rgba(255, 240, 245, 0.95);
     color: #d1568f;
+    font-size: 13px;
 }
 
-/* 右下角：主线关卡 */
+/* --- 右下角主线 --- */
 .bottom-right {
     position: absolute;
-    bottom: 30px;
-    right: 20px;
+    bottom: 15px;
+    right: 15px;
 }
 
 .huge-btn {
-    width: 100px;
-    height: 100px;
-    background: radial-gradient(circle, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+    width: 70px;
+    height: 70px;
+    background: radial-gradient(circle, #ff9a9e 0%, #fecfef 100%);
     color: #fff;
-    font-size: 18px;
+    font-size: 15px;
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
-/* 底部栏：聊天与社交 */
+/* --- 底部栏：社交与聊天 --- */
 .bottom-left {
     position: absolute;
-    bottom: 20px;
-    left: 20px;
+    bottom: 15px;
+    left: 15px;
     display: flex;
-    align-items: flex-end;
-    gap: 15px;
+    align-items: center;
+    gap: 10px;
+    max-width: calc(100vw - 110px); /* 避免与右下角按钮重叠 */
+}
+
+.bottom-left .icon-btn {
+    width: 42px;
+    height: 42px;
 }
 
 .chat-box {
-    background: rgba(0, 0, 0, 0.4);
-    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 8px 12px;
     border-radius: 20px;
     color: #fff;
-    font-size: 14px;
-    max-width: 300px;
+    font-size: 12px;
+    flex: 1; /* 占据剩余空间 */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     cursor: pointer;
 }
 
-.bottom-left .icon-btn {
-    width: 50px;
-    height: 50px;
+/* 大屏设备 (平板/桌面) 适配微调 */
+@media screen and (min-width: 768px) {
+    .background-area h1 { font-size: 2rem; }
+    .icon-btn { font-size: 14px; }
+    .player-avatar { width: 50px; height: 50px; }
+    .player-name { font-size: 16px; }
+    .resource-item { font-size: 14px; padding: 5px 15px; }
+    .system-btns .icon-btn { width: 44px; height: 44px; }
+    .left-sidebar .icon-btn { width: 50px; height: 50px; gap: 15px; }
+    .right-menu .main-btn { width: 64px; height: 64px; font-size: 14px; gap: 15px;}
+    .huge-btn { width: 90px; height: 90px; font-size: 18px; }
+    .bottom-left .icon-btn { width: 50px; height: 50px; }
+    .chat-box { font-size: 14px; padding: 10px 20px; }
+    .right-menu { bottom: 120px; }
 }

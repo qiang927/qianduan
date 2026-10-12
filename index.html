@@ -2,15 +2,16 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>以闪耀之名 - 主页布局复刻</title>
+    <!-- 加入 viewport-fit=cover 适配手机刘海屏，禁止用户缩放页面 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>以闪耀之名 - 主页布局</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="game-container">
         <!-- 3D 人物/背景区 (占位) -->
         <div class="background-area">
-            <h1>🌸 3D人物展示区 / 游戏背景 🌸</h1>
+            <h1>🌸 3D人物展示区 🌸</h1>
         </div>
 
         <!-- UI 交互层 -->
@@ -27,17 +28,19 @@
 
             <!-- 顶部右侧：资源与系统 -->
             <div class="top-right">
-                <div class="resource-item">
-                    <span class="res-icon">体力</span>
-                    <span class="res-value">120/120</span>
-                </div>
-                <div class="resource-item">
-                    <span class="res-icon">金币</span>
-                    <span class="res-value">50000</span>
-                </div>
-                <div class="resource-item">
-                    <span class="res-icon">钻石</span>
-                    <span class="res-value">1200</span>
+                <div class="resources-wrapper">
+                    <div class="resource-item">
+                        <span class="res-icon">体力</span>
+                        <span class="res-value">120</span>
+                    </div>
+                    <div class="resource-item">
+                        <span class="res-icon">金币</span>
+                        <span class="res-value">5万</span>
+                    </div>
+                    <div class="resource-item">
+                        <span class="res-icon">钻石</span>
+                        <span class="res-value">1200</span>
+                    </div>
                 </div>
                 <div class="system-btns">
                     <div class="icon-btn">邮件</div>
@@ -62,15 +65,15 @@
                 <div class="main-btn">协会</div>
             </div>
 
-            <!-- 右下角：主线关卡/出发 -->
-            <div class="bottom-right">
-                <div class="huge-btn">主线之旅</div>
-            </div>
-
             <!-- 底部栏：聊天与社交 -->
             <div class="bottom-left">
-                <div class="chat-box">世界频道：有没有人一起玩家园？</div>
                 <div class="icon-btn">好友</div>
+                <div class="chat-box">世界：有没有人一起玩家园？</div>
+            </div>
+
+            <!-- 右下角：主线关卡 -->
+            <div class="bottom-right">
+                <div class="huge-btn">主线之旅</div>
             </div>
 
         </div>
