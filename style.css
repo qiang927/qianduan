@@ -200,6 +200,23 @@ html, body {
     color: #ffde59;
 }
 
+/* --- 顶部居中 --- */
+.top-center {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    padding: 5px 15px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: bold;
+    z-index: 10;
+    white-space: nowrap;
+    letter-spacing: 1px;
+}
+
 /* --- 顶部右侧 --- */
 .top-right {
     position: absolute;
@@ -214,7 +231,7 @@ html, body {
 
 .resources-wrapper {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; /* 修改为纵向排列 */
     gap: 8px;
     align-items: flex-end;
 }

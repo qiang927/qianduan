@@ -44,6 +44,11 @@
                 景泰三年 1月 1日
             </div>
 
+            <!-- 顶部居中：当前时间 -->
+            <div class="top-center">
+                <span id="game-time-display">某年某月某日</span>
+            </div>
+
             <!-- 顶部左侧：角色身份与年龄 -->
             <div class="top-left">
                 <div class="player-avatar">头像</div>
@@ -64,10 +69,6 @@
                         <span class="res-icon">健康</span>
                         <span class="res-value">100/100</span>
                     </div>
-                </div>
-                <div class="system-btns">
-                    <div class="icon-btn">背包</div>
-                    <div class="icon-btn">信件</div>
                 </div>
             </div>
             </div>
@@ -92,7 +93,7 @@
             <!-- 底部栏：下一年长条按钮 -->
             <div class="bottom-left">
                 <div class="icon-btn">日志</div>
-                <div class="long-btn">下一年</div>
+                <div class="long-btn" id="btn-next-turn">下一年</div>
             </div>
 
             <!-- 右下角：收纳开关 -->

@@ -1,5 +1,7 @@
 // 全局游戏与AI配置数据
 window.GameData = {
+    time: { era: '景泰', year: 1, month: 1, day: 1 },
+    step: 'year', // 当前推演的步长类型: 'year' | 'month' | 'day'
     api: {
         url: 'https://api.openai.com/v1',
         key: '',
@@ -86,7 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. 各个按钮的弹窗内容配置
     const modalConfigs = {
         '设置': {
             title: '【 系统设置 】',
