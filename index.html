@@ -11,7 +11,7 @@
         <!-- 背景作为纯内容区：无边框，左右布局 -->
         <div class="background-area">
             
-            <!-- 左侧：上一年的事情 -->
+            <!-- 左侧：上一次的事情 -->
             <div class="history-panel left-panel">
                 <div class="panel-title">【 往岁纪略 】</div>
                 <div class="panel-content">
@@ -25,12 +25,12 @@
             <!-- 中间渐变分割线 -->
             <div class="divider"></div>
 
-            <!-- 右侧：下一年的事情 / 当前推演 -->
+            <!-- 右侧：下一次的事情 / 当前推演 -->
             <div class="history-panel right-panel">
                 <div class="panel-title">【 今岁推演 】</div>
-                <div class="panel-content" id="current-year-content">
-                    <p>景泰三年 春：新的一年开始了。你站在命运的十字路口。</p>
-                    <p class="fade-text" id="waiting-action-text">点击左侧【地图】或【人际】展开行动，天道正在等待...</p>
+                <div class="panel-content">
+                    <p>景泰三年 春：新的一年开始了。你决定前往城里的私塾外偷听讲学，渴望改变命运。</p>
+                    <p class="fade-text">岁月流转，前方迷雾重重，诸事尚未落定...</p>
                 </div>
             </div>
 
@@ -39,15 +39,8 @@
         <!-- UI 交互层 -->
         <div class="ui-layer">
             
-            <!-- 顶部中间：时间显示 -->
-            <div class="top-center" id="top-time-display">
-                景泰三年 1月 1日
-            </div>
-
             <!-- 顶部居中：当前时间 -->
-            <div class="top-center">
-                <span id="game-time-display">某年某月某日</span>
-            </div>
+            <div class="top-center" id="game-time-display">景泰三年 春 一日</div>
 
             <!-- 顶部左侧：角色身份与年龄 -->
             <div class="top-left">
@@ -61,6 +54,7 @@
             <!-- 顶部右侧：生存资源与辅助系统 -->
             <div class="top-right">
                 <div class="resources-wrapper">
+                    <!-- 将金钱放在健康之上，移除心情 -->
                     <div class="resource-item">
                         <span class="res-icon">金钱</span>
                         <span class="res-value">5000</span>
@@ -70,7 +64,10 @@
                         <span class="res-value">100/100</span>
                     </div>
                 </div>
-            </div>
+                <div class="system-btns">
+                    <div class="icon-btn">背包</div>
+                    <div class="icon-btn">信件</div>
+                </div>
             </div>
 
             <!-- 左侧边栏：核心功能 -->
@@ -90,10 +87,10 @@
                 <div class="main-btn">重生</div>
             </div>
 
-            <!-- 底部栏：下一年长条按钮 -->
+            <!-- 底部栏：下一年(可长按切换)长条按钮 -->
             <div class="bottom-left">
                 <div class="icon-btn">日志</div>
-                <div class="long-btn" id="btn-next-turn">下一年</div>
+                <div class="long-btn" id="advance-time-btn">下一年</div>
             </div>
 
             <!-- 右下角：收纳开关 -->
