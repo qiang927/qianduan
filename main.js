@@ -31,20 +31,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const longBtn = document.querySelector('.long-btn');
     if (longBtn) {
         longBtn.addEventListener('click', () => {
-            showToast('时光飞逝，新的一年开始了...');
+            showToast('时光飞逝，下一年正在推演...');
         });
     }
 
     // 3. 通用按钮点击
-    const buttons = document.querySelectorAll('.icon-btn, .main-btn, .action-box');
+    const buttons = document.querySelectorAll('.icon-btn, .main-btn');
     buttons.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            // 如果是行程格子
-            if (btn.classList.contains('action-box')) {
-                showToast(`你点击了行程：尚未实装安排功能`);
-                return;
-            }
-            // 普通按钮
             const btnName = e.target.textContent.trim();
             if (btnName) {
                 showToast(`[${btnName}] 功能尚未开放！`);

@@ -8,32 +8,32 @@
 </head>
 <body>
     <div class="game-container">
-        <!-- 背景布局：参考《长公主的日常》行程安排界面 -->
+        <!-- 背景作为纯内容区：无边框，左右布局 -->
         <div class="background-area">
-            <div class="schedule-board">
-                <div class="schedule-header">
-                    <span class="sh-title">【 本月行程安排 】</span>
-                    <span class="sh-subtitle">景泰三年 春</span>
-                </div>
-                <div class="schedule-content">
-                    <div class="time-slot">
-                        <span class="time-label">清晨</span>
-                        <div class="action-box">去往 私塾 读书</div>
-                    </div>
-                    <div class="time-slot">
-                        <span class="time-label">午后</span>
-                        <div class="action-box">拜访 张府</div>
-                    </div>
-                    <div class="time-slot">
-                        <span class="time-label">傍晚</span>
-                        <div class="action-box empty-box">点击安排行程...</div>
-                    </div>
-                    <div class="time-slot">
-                        <span class="time-label">深夜</span>
-                        <div class="action-box empty-box">就寝休息...</div>
-                    </div>
+            
+            <!-- 左侧：上一年的事情 -->
+            <div class="history-panel left-panel">
+                <div class="panel-title">【 往岁纪略 】</div>
+                <div class="panel-content">
+                    <p>景泰二年 春：你大病初愈，身体虚弱，整日卧床休养。</p>
+                    <p>景泰二年 夏：邻里逢旱，田地颗粒无收。你随父母变卖了家产，前往京郊逃荒。</p>
+                    <p>景泰二年 秋：在城外遇贵人施粥，勉强渡过难关，你的心境发生了些许变化。</p>
+                    <p>景泰二年 冬：大雪封山，你在破庙中听闻朝廷要征兵，心中隐隐不安。</p>
                 </div>
             </div>
+
+            <!-- 中间渐变分割线 -->
+            <div class="divider"></div>
+
+            <!-- 右侧：下一年的事情 / 当前推演 -->
+            <div class="history-panel right-panel">
+                <div class="panel-title">【 今岁推演 】</div>
+                <div class="panel-content">
+                    <p>景泰三年 春：新的一年开始了。你决定前往城里的私塾外偷听讲学，渴望改变命运。</p>
+                    <p class="fade-text">岁月流转，前方迷雾重重，诸事尚未落定...</p>
+                </div>
+            </div>
+
         </div>
 
         <!-- UI 交互层 -->
@@ -87,7 +87,7 @@
                 <div class="main-btn">重生</div>
             </div>
 
-            <!-- 底部栏：原来是系统日志，现改为下一年长条按钮 -->
+            <!-- 底部栏：下一年长条按钮 -->
             <div class="bottom-left">
                 <div class="icon-btn">日志</div>
                 <div class="long-btn">下一年</div>

@@ -10,7 +10,7 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    font-family: "PingFang SC", "Microsoft YaHei", serif; /* 增加 serif 增加古风感 */
+    font-family: "PingFang SC", "Microsoft YaHei", serif;
     background-color: #000;
 }
 
@@ -21,105 +21,74 @@ html, body {
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
-/* 3D/图文 背景区 - 改为古风/现代通用卷轴行程面板 */
+/* 3D/图文 背景区 - 纯内容，无边框，直接铺在纸张上 */
 .background-area {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #eaddc7; /* 古典纸张底色 */
+    background-color: #eaddc7;
     background-image: radial-gradient(#d3c1a8 1px, transparent 1px);
     background-size: 20px 20px;
+    
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: row;
+    /* 给四周的UI按钮留出充足的空白间距，防止文字被遮挡 */
+    padding: 90px 65px 110px 65px; 
+    box-sizing: border-box;
     z-index: 1;
 }
 
-/* 模拟《长公主的日常》行程面板 */
-.schedule-board {
-    width: 85%;
-    max-width: 500px;
-    height: 65%;
-    background: #fbf6ec; /* 偏白纸色 */
-    border: 2px solid #8b7456; /* 深棕色边框 */
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+/* 左右分栏面板 */
+.history-panel {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 20px;
-    margin-top: 10px;
+    overflow-y: auto;
+    padding: 0 10px;
 }
 
-.schedule-header {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-bottom: 2px dashed #d3c1a8;
-    padding-bottom: 15px;
-    margin-bottom: 15px;
+/* 隐藏滚动条让视觉更干净 */
+.history-panel::-webkit-scrollbar {
+    display: none;
 }
 
-.sh-title {
-    font-size: 18px;
+/* 中间渐变分割线 */
+.divider {
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, #a58f72, transparent);
+    margin: 0 15px;
+}
+
+.panel-title {
+    font-size: 16px;
     font-weight: bold;
     color: #5c4a3d;
+    text-align: center;
+    margin-bottom: 20px;
     letter-spacing: 2px;
+    flex-shrink: 0;
 }
 
-.sh-subtitle {
-    font-size: 14px;
-    color: #8b7456;
-    margin-top: 5px;
-}
-
-.schedule-content {
+.panel-content {
     flex: 1;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 15px;
-    padding-right: 5px;
 }
 
-.time-slot {
-    display: flex;
-    align-items: stretch;
-    gap: 12px;
+.panel-content p {
+    font-size: 13px;
+    color: #4a3c31;
+    line-height: 1.8;
+    text-align: justify;
 }
 
-.time-label {
-    writing-mode: vertical-lr; /* 竖排文字 */
-    color: #8b7456;
-    font-weight: bold;
-    font-size: 15px;
-    letter-spacing: 4px;
-    border-right: 1px solid #d3c1a8;
-    padding-right: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.action-box {
-    flex: 1;
-    background: #fff;
-    border: 1px solid #d3c1a8;
-    padding: 15px;
-    border-radius: 6px;
-    font-size: 15px;
-    color: #333;
-    display: flex;
-    align-items: center;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.02);
-}
-
-.empty-box {
-    background: rgba(255,255,255,0.5);
-    color: #999;
+.fade-text {
+    color: #999 !important;
     font-style: italic;
-    border-style: dashed;
+    opacity: 0.7;
 }
 
 /* UI 交互层 */
@@ -290,7 +259,7 @@ html, body {
     width: 50px;
     height: 50px;
     background: rgba(255, 255, 255, 0.95);
-    color: #5c4a3d; /* 匹配主题 */
+    color: #5c4a3d;
     font-size: 13px;
     box-shadow: 0 3px 8px rgba(0,0,0,0.3);
 }
@@ -306,7 +275,7 @@ html, body {
 .huge-btn {
     width: 60px;
     height: 60px;
-    background: #5c4a3d; /* 深色主题按钮 */
+    background: #5c4a3d;
     color: #fbf6ec;
     font-size: 15px;
     border-radius: 50%;
@@ -321,7 +290,7 @@ html, body {
     display: flex;
     align-items: center;
     gap: 15px;
-    width: calc(100vw - 110px); /* 给右侧收纳按钮留出空间 */
+    width: calc(100vw - 110px);
 }
 
 .bottom-left .icon-btn {
@@ -332,7 +301,7 @@ html, body {
 .long-btn {
     flex: 1;
     height: 46px;
-    background: #c25b4e; /* 典雅的朱红色，突出推进时间 */
+    background: #c25b4e;
     color: #fff;
     border-radius: 25px;
     display: flex;
@@ -353,9 +322,10 @@ html, body {
 
 /* 大屏设备微调 */
 @media screen and (min-width: 768px) {
-    .schedule-board { height: 75%; padding: 30px; }
-    .sh-title { font-size: 24px; }
-    .action-box { font-size: 16px; }
+    .background-area { padding: 120px 100px 140px 100px; }
+    .panel-title { font-size: 22px; margin-bottom: 30px; }
+    .panel-content p { font-size: 16px; line-height: 2; margin-bottom: 20px;}
+    .divider { margin: 0 30px; }
     .player-avatar { width: 50px; height: 50px; }
     .right-menu { bottom: 130px; right: 25px; }
     .right-menu .main-btn { width: 60px; height: 60px; font-size: 14px; gap: 15px;}
