@@ -89,7 +89,7 @@ html, body {
     border-radius: 30px;
     padding: 4px 12px 4px 4px;
     color: #fff;
-    max-width: 45vw; /* 防止与右侧重叠 */
+    max-width: 45vw;
 }
 
 .player-avatar {
@@ -140,7 +140,7 @@ html, body {
 .resources-wrapper {
     display: flex;
     gap: 8px;
-    flex-wrap: wrap; /* 空间不足时折行 */
+    flex-wrap: wrap;
     justify-content: flex-end;
 }
 
@@ -185,14 +185,27 @@ html, body {
     height: 42px;
 }
 
-/* --- 右侧主菜单 --- */
+/* --- 右侧主菜单 (已改为收纳态) --- */
 .right-menu {
     position: absolute;
-    bottom: 90px;
-    right: 15px;
+    bottom: 125px; /* 在主线按钮正上方 */
+    right: 23px; /* 微调与主线按钮对齐居中 */
     display: flex;
     flex-direction: column;
     gap: 12px;
+    /* 初始隐藏动画状态 */
+    opacity: 0;
+    transform: translateY(40px) scale(0.6);
+    transform-origin: bottom center;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* 增加一点Q弹回弹效果 */
+    pointer-events: none;
+    z-index: 5;
+}
+
+.right-menu.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
 }
 
 .right-menu .main-btn {
@@ -201,13 +214,15 @@ html, body {
     background: rgba(255, 240, 245, 0.95);
     color: #d1568f;
     font-size: 13px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
 }
 
 /* --- 右下角主线 --- */
 .bottom-right {
     position: absolute;
-    bottom: 15px;
+    bottom: 40px; /* 往上挪，脱离屏幕边缘 */
     right: 15px;
+    z-index: 10;
 }
 
 .huge-btn {
@@ -217,17 +232,18 @@ html, body {
     color: #fff;
     font-size: 15px;
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 10px rgba(255,154,158,0.5);
 }
 
 /* --- 底部栏：社交与聊天 --- */
 .bottom-left {
     position: absolute;
-    bottom: 15px;
+    bottom: 40px; /* 和主线按钮水平对齐，也上移 */
     left: 15px;
     display: flex;
     align-items: center;
     gap: 10px;
-    max-width: calc(100vw - 110px); /* 避免与右下角按钮重叠 */
+    max-width: calc(100vw - 110px);
 }
 
 .bottom-left .icon-btn {
@@ -241,7 +257,7 @@ html, body {
     border-radius: 20px;
     color: #fff;
     font-size: 12px;
-    flex: 1; /* 占据剩余空间 */
+    flex: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -257,9 +273,11 @@ html, body {
     .resource-item { font-size: 14px; padding: 5px 15px; }
     .system-btns .icon-btn { width: 44px; height: 44px; }
     .left-sidebar .icon-btn { width: 50px; height: 50px; gap: 15px; }
+    .right-menu { bottom: 145px; right: 33px; }
     .right-menu .main-btn { width: 64px; height: 64px; font-size: 14px; gap: 15px;}
+    .bottom-right { bottom: 40px; right: 20px; }
     .huge-btn { width: 90px; height: 90px; font-size: 18px; }
+    .bottom-left { bottom: 40px; left: 20px; }
     .bottom-left .icon-btn { width: 50px; height: 50px; }
     .chat-box { font-size: 14px; padding: 10px 20px; }
-    .right-menu { bottom: 120px; }
 }
