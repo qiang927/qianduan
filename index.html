@@ -28,9 +28,9 @@
             <!-- 右侧：下一年的事情 / 当前推演 -->
             <div class="history-panel right-panel">
                 <div class="panel-title">【 今岁推演 】</div>
-                <div class="panel-content">
-                    <p>景泰三年 春：新的一年开始了。你决定前往城里的私塾外偷听讲学，渴望改变命运。</p>
-                    <p class="fade-text">岁月流转，前方迷雾重重，诸事尚未落定...</p>
+                <div class="panel-content" id="current-year-content">
+                    <p>景泰三年 春：新的一年开始了。你站在命运的十字路口。</p>
+                    <p class="fade-text" id="waiting-action-text">点击左侧【地图】或【人际】展开行动，天道正在等待...</p>
                 </div>
             </div>
 
@@ -64,7 +64,7 @@
                         <span class="res-value">85</span>
                     </div>
                 </div>
-                <!-- 调整：信件在背包下面，使用列布局 -->
+                <!-- 系统按钮 -->
                 <div class="system-btns">
                     <div class="icon-btn">背包</div>
                     <div class="icon-btn">信件</div>
@@ -115,8 +115,6 @@
         </div>
     </div>
 
-    <!-- 引入AI引擎逻辑层 -->
-    <script src="ai_engine.js"></script>
     <script src="main.js"></script>
 </body>
 </html>
