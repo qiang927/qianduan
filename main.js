@@ -1,9 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // --- SillyTavern 风格 AI 预设数据 ---
-    const ST_SYSTEM_PRESET = "你是一个文字沙盒游戏的服务端。你必须以简短的、带有古风韵味的文字描述游戏事件的发生。玩家不能直接与你对话，只能通过系统发送的动作指令与世界交互。输出控制在50-100字左右，强调结果和氛围。";
-    const ST_WORLDBOOK = "世界背景：大明景泰三年，天下初定，但民间仍有妖患与饥荒。当前地点：南方偏僻小镇，四周环山。";
-    const ST_USER_PERSONA = "姓名：张三。身份：平民。年龄：18岁。体质：虚弱。名望：籍籍无名。金钱：5000文。";
+    // 初始化角色名称
+    const initCharName = localStorage.getItem('char_name') || '张三';
+    const playerNameEl = document.querySelector('.player-name');
+    if (playerNameEl) {
+        playerNameEl.textContent = `平民_${initCharName}`;
+    }
 
     // 1. 收纳按钮展开/收起逻辑
     const toggleMenuBtn = document.getElementById('toggle-menu-btn');
@@ -32,22 +34,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalContentBody = document.getElementById('modal-content-body');
     const modalClose = document.getElementById('modal-close');
 
-    function openModal(title, htmlContent, onOpenCallback = null) {
+    // 增加 onOpenCallback 支持弹窗后执行 JS (如绑定事件、读取本地存储)
+    function openModal(title, htmlContent, onOpenCallback) {
         modalTitle.textContent = title;
         modalContentBody.innerHTML = htmlContent;
         modalOverlay.classList.add('active');
+        
         if (rightMenu && rightMenu.classList.contains('show')) {
             rightMenu.classList.remove('show');
             toggleMenuBtn.textContent = '展开';
         }
-        if (onOpenCallback) onOpenCallback();
+
+        if (typeof onOpenCallback === 'function') {
+            // 确保 DOM 渲染完毕后再执行
+            setTimeout(onOpenCallback, 0);
+        }
     }
 
     function closeModal() {
         modalOverlay.classList.remove('active');
     }
 
-    if (modalClose) modalClose.addEventListener('click', closeModal);
+    if (modalClose) {
+        modalClose.addEventListener('click', closeModal);
+    }
     if (modalOverlay) {
         modalOverlay.addEventListener('click', (e) => {
             if (e.target === modalOverlay) closeModal();
@@ -78,91 +88,208 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         '人际': {
             title: '【 人脉交游 】',
-            // 给可交互NPC添加 ai-interact-npc class 和 data 属性
             html: `
                 <div class="list-layout">
-                    <div class="list-item interactive-item ai-interact-npc" data-npc="老村长">
-                        <span>老村长</span><span style="color:#8b7456;">好感: 30 (拜访)</span>
-                    </div>
-                    <div class="list-item interactive-item ai-interact-npc" data-npc="私塾先生">
-                        <span>私塾先生</span><span style="color:#8b7456;">好感: 10 (拜访)</span>
-                    </div>
-                    <div class="list-item interactive-item ai-interact-npc" data-npc="神秘乞丐">
-                        <span>神秘乞丐</span><span style="color:#c25b4e;">好感: -50 (施舍)</span>
-                    </div>
-                    <div style="margin-top:10px;text-align:center;font-size:12px;color:#8b7456;">*点击人物进行互动推演*</div>
+                    <div class="list-item"><span>私塾先生</span><span>好感: 10</span></div>
+                    <div class="list-item"><span>神秘乞丐</span><span style="color:#c25b4e;">好感: -50</span></div>
                 </div>
             `
         },
         '地图': {
             title: '【 城镇地图 】',
-            // 给可交互地点添加 ai-interact-loc class 和 data 属性
             html: `
                 <div class="grid-layout">
-                    <div class="grid-cell interactive-cell ai-interact-loc" data-loc="自家">自家</div>
-                    <div class="grid-cell interactive-cell ai-interact-loc" data-loc="市集">市集</div>
-                    <div class="grid-cell interactive-cell ai-interact-loc" data-loc="私塾">私塾</div>
-                    <div class="grid-cell interactive-cell ai-interact-loc" data-loc="医馆">医馆</div>
-                    <div class="grid-cell interactive-cell ai-interact-loc" data-loc="破庙">破庙</div>
-                    <div class="grid-cell interactive-cell ai-interact-loc" data-loc="后山">后山</div>
+                    <div class="grid-cell" style="background:#eaddc7;color:#5c4a3d;">自家</div>
+                    <div class="grid-cell">市集</div>
+                    <div class="grid-cell">私塾</div>
+                    <div class="grid-cell">破庙</div>
                 </div>
-                <div style="margin-top:15px;text-align:center;font-size:12px;color:#8b7456;">*点击地点进行探索推演*</div>
             `
         },
         '我': { 
-            title: '【 个人志 】',
+            title: '【 造物设定 (Prompt) 】',
+            html: `
+                <div style="margin-bottom:15px;font-size:13px;color:#8b7456;text-align:center;">在此写下你的身世与夙愿，天道(AI)将据此推演你的命运。</div>
+                <div class="form-group">
+                    <label>角色姓名</label>
+                    <input type="text" id="char-name-input" class="modal-input" placeholder="例如：张三">
+                </div>
+                <div class="form-group">
+                    <label>背景与性格设定</label>
+                    <textarea id="char-prompt-input" class="modal-textarea" placeholder="例如：我是一个出生在贫苦农家的孩子，性格坚韧，渴望通过读书改变命运..."></textarea>
+                </div>
+                <button class="action-btn" id="save-char-btn" style="width:100%; padding:10px; margin-top:10px;">铭记于天道 (保存设定)</button>
+            `,
+            onOpen: () => {
+                const nameInput = document.getElementById('char-name-input');
+                const promptInput = document.getElementById('char-prompt-input');
+                
+                // 读取本地存储
+                nameInput.value = localStorage.getItem('char_name') || '张三';
+                promptInput.value = localStorage.getItem('char_prompt') || '我是一个出生在贫苦农家的孩子，渴望通过读书改变命运。';
+
+                // 保存设定
+                document.getElementById('save-char-btn').addEventListener('click', () => {
+                    const newName = nameInput.value.trim() || '无名氏';
+                    const newPrompt = promptInput.value.trim();
+                    localStorage.setItem('char_name', newName);
+                    localStorage.setItem('char_prompt', newPrompt);
+                    
+                    // 更新主界面的名字
+                    const pNameEl = document.querySelector('.player-name');
+                    if(pNameEl) pNameEl.textContent = `平民_${newName}`;
+                    
+                    showToast('角色设定已保存！');
+                    closeModal();
+                });
+            }
+        },
+        '任务': {
+            title: '【 当前目标 】',
             html: `
                 <div class="list-layout">
-                    <div class="list-item"><span>姓名</span><span>平民_张三</span></div>
-                    <div class="list-item"><span>骨龄</span><span>18 岁</span></div>
-                    <div class="list-item"><span>体质</span><span>虚弱</span></div>
+                    <div class="list-item" style="border-left: 3px solid #c25b4e;">
+                        <div style="display:flex;flex-direction:column;">
+                            <span style="font-weight:bold;">[主线] 逆天改命</span>
+                            <span style="font-size:12px;color:#666;margin-top:4px;">前往私塾偷听讲学 (0/1)</span>
+                        </div>
+                    </div>
                 </div>
             `
         },
         '设置': {
-            title: '【 系统设置 & API 】',
+            title: '【 系统与大模型设置 】',
             html: `
                 <div class="list-layout">
-                    <div class="list-item" style="flex-direction:column; align-items:flex-start; gap:8px;">
-                        <span style="font-weight:bold;font-size:13px;">接口地址 (兼容OpenAI)</span>
-                        <input type="text" id="setting-api-url" class="form-input" placeholder="例如: https://api.openai.com/v1">
+                    <div class="form-group" style="margin-top:5px;">
+                        <label>API 地址 (Base URL)</label>
+                        <input type="text" id="api-url" class="modal-input" placeholder="例如: https://api.openai.com/v1">
                     </div>
-                    <div class="list-item" style="flex-direction:column; align-items:flex-start; gap:8px;">
-                        <span style="font-weight:bold;font-size:13px;">密钥 (API Key)</span>
-                        <input type="password" id="setting-api-key" class="form-input" placeholder="输入 API 密钥">
+                    <div class="form-group">
+                        <label>API 密钥 (API Key)</label>
+                        <input type="password" id="api-key" class="modal-input" placeholder="sk-...">
                     </div>
-                    <div class="list-item" style="justify-content:space-between; border:none; background:transparent; padding:0;">
-                        <span style="font-weight:bold;font-size:13px;">选择模型</span>
-                        <button class="action-btn" id="btn-fetch-models">获取模型</button>
+                    <div class="form-group" style="display:flex; flex-direction:row; justify-content:space-between; align-items:center;">
+                        <label>大语言模型</label>
+                        <button class="action-btn" id="fetch-models-btn" style="padding:4px 10px;">获取模型</button>
                     </div>
-                    <div class="list-item" style="flex-direction:column; align-items:flex-start; gap:8px;">
-                        <select id="setting-api-model" class="form-select">
-                            <option value="">请先获取模型</option>
+                    <div class="form-group">
+                        <select id="model-select" class="modal-select">
+                            <option value="">手动输入或点击获取</option>
                         </select>
+                        <input type="text" id="manual-model" class="modal-input" placeholder="或在此手动输入模型名称" style="margin-top:8px;">
                     </div>
-                    <button class="action-btn" id="btn-save-settings" style="margin-top:5px; padding:10px; width:100%; font-size:14px; background:#c25b4e;">保存设置</button>
+                    <button class="action-btn" id="save-ai-settings" style="width:100%; padding:10px; margin-top:5px; background:#c25b4e;">保存设置</button>
                 </div>
             `,
             onOpen: () => {
-                // 打开设置弹窗时，读取缓存
-                document.getElementById('setting-api-url').value = localStorage.getItem('ai_url') || '';
-                document.getElementById('setting-api-key').value = localStorage.getItem('ai_key') || '';
-                const savedModel = localStorage.getItem('ai_model');
+                const urlInput = document.getElementById('api-url');
+                const keyInput = document.getElementById('api-key');
+                const modelSelect = document.getElementById('model-select');
+                const manualModelInput = document.getElementById('manual-model');
+                
+                // 加载已保存设置
+                urlInput.value = localStorage.getItem('ai_api_url') || '';
+                keyInput.value = localStorage.getItem('ai_api_key') || '';
+                const savedModel = localStorage.getItem('ai_model') || '';
                 if (savedModel) {
-                    document.getElementById('setting-api-model').innerHTML = `<option value="${savedModel}">${savedModel}</option>`;
+                    manualModelInput.value = savedModel;
+                    modelSelect.innerHTML = \`<option value="\${savedModel}">\${savedModel}</option>\`;
                 }
+
+                // 获取模型列表模拟/真实调用
+                document.getElementById('fetch-models-btn').addEventListener('click', async () => {
+                    const url = urlInput.value.trim();
+                    const key = keyInput.value.trim();
+                    if (!url || !key) return showToast('请先填写API地址和密钥');
+                    
+                    showToast('正在尝试获取模型列表...');
+                    try {
+                        const endpoint = url.endsWith('/') ? url + 'models' : url + '/models';
+                        const response = await fetch(endpoint, {
+                            headers: { 'Authorization': 'Bearer ' + key }
+                        });
+                        const data = await response.json();
+                        
+                        if (data && data.data && Array.isArray(data.data)) {
+                            modelSelect.innerHTML = '';
+                            data.data.forEach(m => {
+                                const opt = document.createElement('option');
+                                opt.value = m.id;
+                                opt.textContent = m.id;
+                                modelSelect.appendChild(opt);
+                            });
+                            showToast('获取模型成功！');
+                            
+                            // 联动选择框与手动输入框
+                            manualModelInput.value = modelSelect.value;
+                            modelSelect.addEventListener('change', () => {
+                                manualModelInput.value = modelSelect.value;
+                            });
+                        } else {
+                            showToast('未获取到模型列表，请检查API格式');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        showToast('网络错误或跨域(CORS)拦截，请手动输入模型名称');
+                    }
+                });
+
+                // 保存
+                document.getElementById('save-ai-settings').addEventListener('click', () => {
+                    localStorage.setItem('ai_api_url', urlInput.value.trim());
+                    localStorage.setItem('ai_api_key', keyInput.value.trim());
+                    // 优先取手动输入框的值，它与下拉框联动
+                    localStorage.setItem('ai_model', manualModelInput.value.trim());
+                    showToast('AI设置已保存！');
+                    closeModal();
+                });
             }
         },
-        '任务': { title: '【 当前目标 】', html: '<div class="text-center">暂无任务</div>' },
-        '微调': { title: '【 造物主微调 】', html: '<div class="text-center">修改天道规则暂未开放</div>' },
-        '存档': { title: '【 记录人生 】', html: '<div class="text-center">暂无存档位</div>' },
-        '读档': { title: '【 回溯时光 】', html: '<div class="text-center">暂无存档可读</div>' },
-        '重生': { title: '【 轮回转世 】', html: '<div class="text-center">时机未到，无法转世。</div>' },
-        '日志': { title: '【 过往风霜 】', html: '<div class="text-center">往事随风...</div>' },
-        '下一年': { title: '【 岁末结算 】', html: '<div class="text-center">岁月流逝...</div>' }
+        '微调': { title: '【 造物主微调 】', html: '<div class="text-center">造物主权限不足</div>' },
+        '存档': { title: '【 记录人生 】', html: '<div class="text-center">尚未连通时空长河(待开发)</div>' },
+        '读档': { title: '【 回溯时光 】', html: '<div class="text-center">尚未连通时空长河(待开发)</div>' },
+        '重生': { title: '【 轮回转世 】', html: '<div class="text-center">轮回盘正在修复中...</div>' },
+        '日志': { title: '【 过往风霜 】', html: '<div class="text-center">过往如烟，暂无记录。</div>' },
+        '下一年': {
+            title: '【 岁末结算 】',
+            html: `
+                <div class="text-center">
+                    <p style="font-size:18px;font-weight:bold;margin-bottom:10px;">景泰三年</p>
+                    <p style="margin-bottom:15px;color:#8b7456;">时光流逝，是否将命运交由天道推演？</p>
+                    <button class="action-btn" id="next-year-btn" style="width:100%;padding:10px;background:#c25b4e;">推演下一年 (召唤AI)</button>
+                </div>
+            `,
+            onOpen: () => {
+                document.getElementById('next-year-btn').addEventListener('click', () => {
+                    // 读取玩家的设定并模拟发送给大模型
+                    const charName = localStorage.getItem('char_name') || '张三';
+                    const charPrompt = localStorage.getItem('char_prompt') || '无设定';
+                    const aiUrl = localStorage.getItem('ai_api_url');
+                    const aiKey = localStorage.getItem('ai_api_key');
+                    const aiModel = localStorage.getItem('ai_model');
+
+                    if (!aiUrl || !aiKey || !aiModel) {
+                        showToast('天道未降临！请先前往【设置】配置AI大模型参数。');
+                        closeModal();
+                        return;
+                    }
+
+                    // 模拟发送过程
+                    showToast(`正在将 [${charName}] 的命运设定发往天道推演...`);
+                    console.log('--- 发送给AI的 Prompt ---');
+                    console.log(`角色名: ${charName}`);
+                    console.log(`背景设定: ${charPrompt}`);
+                    console.log(`请求地址: ${aiUrl}, 模型: ${aiModel}`);
+                    console.log('---------------------------');
+                    
+                    closeModal();
+                });
+            }
+        }
     };
 
-    // 4. 绑定侧边栏/底部按钮的打开弹窗事件
+    // 4. 绑定所有按钮的点击事件
     const allButtons = document.querySelectorAll('.icon-btn, .main-btn, .long-btn');
     allButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -170,164 +297,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const config = modalConfigs[btnName];
             if (config) {
                 openModal(config.title, config.html, config.onOpen);
+            } else {
+                openModal('【 提示 】', `<div class="text-center">功能 [${btnName}] 正在开发中...</div>`);
             }
         });
     });
 
+    // 左上角头像点击 -> 触发"我"的设定弹窗
     const topLeft = document.querySelector('.top-left');
     if (topLeft) {
-        topLeft.addEventListener('click', () => openModal(modalConfigs['我'].title, modalConfigs['我'].html));
-    }
-
-    // 5. 弹窗内部的事件委托 (处理API设置保存、获取模型，以及点击地点/人物触发AI)
-    modalContentBody.addEventListener('click', async (e) => {
-        
-        // ---- API 设置逻辑 ----
-        if (e.target.id === 'btn-save-settings') {
-            const url = document.getElementById('setting-api-url').value.trim();
-            const key = document.getElementById('setting-api-key').value.trim();
-            const model = document.getElementById('setting-api-model').value;
-            localStorage.setItem('ai_url', url);
-            localStorage.setItem('ai_key', key);
-            localStorage.setItem('ai_model', model);
-            showToast('设置已保存');
-            closeModal();
-        }
-
-        if (e.target.id === 'btn-fetch-models') {
-            const url = document.getElementById('setting-api-url').value.trim();
-            const key = document.getElementById('setting-api-key').value.trim();
-            if (!url || !key) return showToast('请填写地址和密钥');
-            
-            showToast('正在拉取模型...');
-            try {
-                // OpenAI 标准模型获取接口
-                const res = await fetch(`${url}/models`, {
-                    headers: { 'Authorization': `Bearer ${key}` }
-                });
-                const data = await res.json();
-                if (data.error) throw new Error(data.error.message || '获取失败');
-                
-                const select = document.getElementById('setting-api-model');
-                select.innerHTML = '';
-                if (data.data && Array.isArray(data.data)) {
-                    data.data.forEach(m => {
-                        const opt = document.createElement('option');
-                        opt.value = m.id;
-                        opt.textContent = m.id;
-                        select.appendChild(opt);
-                    });
-                    showToast('模型拉取成功！');
-                } else {
-                    throw new Error('未获取到模型列表');
-                }
-            } catch(err) {
-                showToast(`获取失败: ${err.message}`);
-            }
-        }
-
-        // ---- AI 交互动作触发逻辑 ----
-        const locTarget = e.target.closest('.ai-interact-loc');
-        if (locTarget) {
-            const locName = locTarget.dataset.loc;
-            closeModal();
-            triggerAIAction(`玩家前往了地点：[${locName}]，试图探索或触发事件。`);
-        }
-
-        const npcTarget = e.target.closest('.ai-interact-npc');
-        if (npcTarget) {
-            const npcName = npcTarget.dataset.npc;
-            closeModal();
-            triggerAIAction(`玩家靠近了人物：[${npcName}]，试图与其交流或互动。`);
-        }
-    });
-
-    // 6. 核心：组装 SillyTavern 格式的 Prompt 并请求 AI
-    async function triggerAIAction(actionText) {
-        const url = localStorage.getItem('ai_url');
-        const key = localStorage.getItem('ai_key');
-        const model = localStorage.getItem('ai_model');
-
-        if (!url || !key || !model) {
-            showToast('天道未明，请先在【设置】中配置并保存 API。');
-            return;
-        }
-
-        showToast('天道推演中...');
-        
-        // 构造类似 SillyTavern 的 System Prompt
-        const systemMessage = `${ST_SYSTEM_PRESET}\n\n【世界设定】\n${ST_WORLDBOOK}\n\n【玩家设定】\n${ST_USER_PERSONA}`;
-        const messages = [
-            { role: "system", content: systemMessage },
-            { role: "user", content: `【动作指令】\n${actionText}` }
-        ];
-
-        try {
-            const res = await fetch(`${url}/chat/completions`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${key}`
-                },
-                body: JSON.stringify({
-                    model: model,
-                    messages: messages,
-                    max_tokens: 150, // 控制输出不要太长
-                    temperature: 0.7
-                })
-            });
-
-            const data = await res.json();
-            if (data.error) throw new Error(data.error.message);
-            
-            const aiReply = data.choices[0].message.content;
-            
-            // 将结果渲染到右侧推演面板中
-            appendLogToCurrentYear(actionText, aiReply);
-
-        } catch (err) {
-            showToast(`推演失败: ${err.message}`);
-        }
-    }
-
-    // 将 AI 返回的结果写入右侧背景面板
-    function appendLogToCurrentYear(action, reply) {
-        const container = document.getElementById('current-year-content');
-        if (!container) return;
-
-        // 移除等待提示文字
-        const fadeText = document.getElementById('waiting-action-text');
-        if (fadeText) fadeText.remove();
-
-        const p = document.createElement('p');
-        // 提炼动作文本给用户看
-        let cleanAction = action.replace(/玩家前往了地点：\[(.*?)\]，.*/, '前往 $1');
-        cleanAction = cleanAction.replace(/玩家靠近了人物：\[(.*?)\]，.*/, '拜访 $1');
-
-        p.innerHTML = `<span style="color:#c25b4e;font-weight:bold;">[${cleanAction}]</span> ${reply}`;
-        
-        // 加一点简单的渐显动画
-        p.style.opacity = 0;
-        p.style.transform = 'translateY(10px)';
-        p.style.transition = 'all 0.5s ease';
-        container.appendChild(p);
-        
-        // 触发重绘以运行动画
-        requestAnimationFrame(() => {
-            p.style.opacity = 1;
-            p.style.transform = 'translateY(0)';
+        topLeft.addEventListener('click', () => {
+            const config = modalConfigs['我'];
+            openModal(config.title, config.html, config.onOpen);
         });
-
-        // 自动滚动到底部
-        const panel = container.closest('.history-panel');
-        if (panel) {
-            setTimeout(() => { panel.scrollTop = panel.scrollHeight; }, 100);
-        }
     }
 
-    // 7. 通用 Toast 提示框
+    // 5. 提示框(Toast)逻辑
     function showToast(message) {
-        let existingToast = document.querySelector('.toast');
+        const existingToast = document.querySelector('.toast');
         if (existingToast) existingToast.remove();
 
         const toast = document.createElement('div');
@@ -335,15 +322,39 @@ document.addEventListener('DOMContentLoaded', () => {
         toast.textContent = message;
 
         Object.assign(toast.style, {
-            position: 'absolute', top: '45%', left: '50%',
+            position: 'absolute',
+            top: '45%',
+            left: '50%',
             transform: 'translate(-50%, -50%)',
-            backgroundColor: 'rgba(0, 0, 0, 0.75)', color: 'white',
-            padding: '12px 24px', borderRadius: '8px',
-            fontSize: '16px', zIndex: '9999', pointerEvents: 'none',
-            letterSpacing: '1px', animation: 'fadeInOut 2s ease-in-out forwards'
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            color: 'white',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            fontSize: '15px',
+            zIndex: '9999',
+            pointerEvents: 'none',
+            letterSpacing: '1px',
+            animation: 'fadeInOut 2.5s ease-in-out forwards'
         });
 
         document.body.appendChild(toast);
-        setTimeout(() => { if (document.body.contains(toast)) toast.remove(); }, 2000);
+
+        setTimeout(() => {
+            if (document.body.contains(toast)) toast.remove();
+        }, 2500);
+    }
+
+    if (!document.getElementById('toast-style')) {
+        const style = document.createElement('style');
+        style.id = 'toast-style';
+        style.innerHTML = `
+            @keyframes fadeInOut {
+                0% { opacity: 0; transform: translate(-50%, -40%); }
+                15% { opacity: 1; transform: translate(-50%, -50%); }
+                85% { opacity: 1; transform: translate(-50%, -50%); }
+                100% { opacity: 0; transform: translate(-50%, -60%); }
+            }
+        `;
+        document.head.appendChild(style);
     }
 });
