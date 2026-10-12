@@ -129,7 +129,7 @@ html, body {
     padding: 4px 12px 4px 4px;
     color: #fff;
     max-width: 45vw;
-    cursor: pointer;
+    cursor: pointer; 
 }
 .top-left:active { transform: scale(0.96); }
 
@@ -174,7 +174,7 @@ html, body {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 12px;
+    gap: 12px; 
     max-width: 50vw;
 }
 
@@ -201,7 +201,7 @@ html, body {
 
 .system-btns {
     display: flex;
-    flex-direction: column;
+    flex-direction: column; 
     gap: 12px;
 }
 
@@ -311,7 +311,7 @@ html, body {
 .long-btn:active { transform: scale(0.96); }
 
 /* =========================================================
-   自定义弹窗样式 
+   自定义弹窗样式
    ========================================================= */
 .modal-overlay {
     position: fixed;
@@ -333,9 +333,9 @@ html, body {
 
 .modal-box {
     width: 85%;
-    max-width: 400px; /* 稍微放大一点以容纳表单 */
-    max-height: 80vh; 
-    background: #fbf6ec; 
+    max-width: 360px;
+    max-height: 75vh;
+    background: #fbf6ec;
     border: 2px solid #8b7456;
     border-radius: 8px;
     box-shadow: 0 5px 20px rgba(0,0,0,0.4);
@@ -360,7 +360,6 @@ html, body {
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
     position: relative;
-    flex-shrink: 0;
 }
 
 .modal-title {
@@ -384,17 +383,10 @@ html, body {
     overflow-y: auto;
     flex: 1;
     color: #4a3c31;
-    /* 允许文本框等正常响应用户选择 */
-    user-select: text;
 }
 
-/* 弹窗内部通用布局：列表式 */
-.list-layout {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
+/* 弹窗内部通用布局：列表/网格 */
+.list-layout { display: flex; flex-direction: column; gap: 10px; }
 .list-item {
     background: rgba(0,0,0,0.03);
     border: 1px solid #d3c1a8;
@@ -406,13 +398,7 @@ html, body {
     font-size: 14px;
 }
 
-/* 弹窗内部通用布局：网格区 */
-.grid-layout {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-}
-
+.grid-layout { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .grid-cell {
     aspect-ratio: 1;
     background: rgba(0,0,0,0.04);
@@ -426,55 +412,61 @@ html, body {
     cursor: pointer;
 }
 
-/* 设置与微调区的特殊元素 */
 .action-btn {
     background: #5c4a3d;
     color: #fbf6ec;
     border: none;
-    padding: 5px 12px;
+    padding: 6px 14px;
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 13px;
     cursor: pointer;
+    font-family: inherit;
+    transition: background 0.1s;
 }
 .action-btn:active { background: #4a3c31; }
 
 .text-center { text-align: center; font-size: 14px; line-height: 1.6; }
 
 /* =========================================================
-   表单与输入框样式 (AI驱动相关)
+   新增：表单/输入框古典风格
    ========================================================= */
-.input-group {
+.form-group {
+    margin-bottom: 12px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    margin-bottom: 12px;
     text-align: left;
 }
-.input-group label {
+
+.form-group label {
     font-size: 13px;
-    color: #5c4a3d;
     font-weight: bold;
+    color: #5c4a3d;
+    margin-bottom: 5px;
 }
-.form-input, .form-textarea, .form-select {
+
+.classical-input, .classical-select, .classical-textarea {
     width: 100%;
-    background: rgba(0,0,0,0.03);
-    border: 1px solid #d3c1a8;
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 1px solid #a58f72;
     padding: 8px 10px;
-    font-size: 14px;
-    color: #4a3c31;
+    border-radius: 4px;
     font-family: inherit;
+    color: #4a3c31;
+    font-size: 14px;
     outline: none;
-    transition: all 0.2s;
+    transition: border-color 0.2s;
+    /* 允许在输入框中选中文本 */
+    user-select: text; 
 }
-.form-input:focus, .form-textarea:focus, .form-select:focus {
+
+.classical-input:focus, .classical-select:focus, .classical-textarea:focus {
     border-color: #c25b4e;
-    background: rgba(255,255,255,0.6);
-    box-shadow: 0 0 5px rgba(194,91,78,0.2);
+    background: rgba(255, 255, 255, 0.9);
 }
-.form-textarea {
+
+.classical-textarea {
     resize: vertical;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 /* 大屏设备微调 */
