@@ -437,6 +437,36 @@ html, body {
 
 .text-center { text-align: center; font-size: 14px; line-height: 1.6; }
 
+/* --- 设置面板中的输入框和选择框 --- */
+.setting-input {
+    width: 100%;
+    padding: 8px 10px;
+    margin-top: 5px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid #d3c1a8;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #4a3c31;
+    font-family: inherit;
+}
+
+.setting-input:focus {
+    outline: none;
+    border-color: #c25b4e;
+    background: #fff;
+}
+
+.model-select {
+    width: calc(100% - 70px);
+    padding: 8px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid #d3c1a8;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #4a3c31;
+    font-family: inherit;
+}
+
 /* 大屏设备微调 */
 @media screen and (min-width: 768px) {
     .background-area { padding: 120px 100px 140px 100px; }

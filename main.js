@@ -28,15 +28,70 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalContentBody = document.getElementById('modal-content-body');
     const modalClose = document.getElementById('modal-close');
 
+    // 5. 特殊弹窗内的按钮事件绑定逻辑
+    function bindModalEvents(title) {
+        if (title === '【 系统设置 】') {
+            const btnFetch = document.getElementById('btn-fetch-models');
+            const btnSave = document.getElementById('btn-save-api');
+            const inputUrl = document.getElementById('api-url');
+            const inputKey = document.getElementById('api-key');
+            const selectModel = document.getElementById('api-model');
+
+            if (btnFetch) {
+                btnFetch.addEventListener('click', async () => {
+                    const url = inputUrl.value.trim();
+                    const key = inputKey.value.trim();
+                    if (!url || !key) {
+                        showToast('请先填写API地址和密钥');
+                        return;
+                    }
+                    try {
+                        btnFetch.textContent = '获取中...';
+                        const models = await AIEngine.fetchModels(url, key);
+                        selectModel.innerHTML = '';
+                        models.forEach(m => {
+                            const option = document.createElement('option');
+                            option.value = m;
+                            option.textContent = m;
+                            selectModel.appendChild(option);
+                        });
+                        showToast('模型列表获取成功');
+                    } catch (e) {
+                        showToast(e.message);
+                    } finally {
+                        btnFetch.textContent = '获取';
+                    }
+                });
+            }
+
+            if (btnSave) {
+                btnSave.addEventListener('click', () => {
+                    const url = inputUrl.value.trim();
+                    const key = inputKey.value.trim();
+                    const model = selectModel.value;
+                    if (!url || !key || !model) {
+                        showToast('请完整填写地址、密钥并选择模型');
+                        return;
+                    }
+                    AIEngine.saveConfig(url, key, model);
+                    showToast('天道节点配置已保存');
+                });
+            }
+        }
+    }
+
     function openModal(title, htmlContent) {
         modalTitle.textContent = title;
         modalContentBody.innerHTML = htmlContent;
         modalOverlay.classList.add('active');
-        // 打开弹窗时，如果右侧菜单是展开的，顺便收起它
+        
         if (rightMenu && rightMenu.classList.contains('show')) {
             rightMenu.classList.remove('show');
             toggleMenuBtn.textContent = '展开';
         }
+
+        // 每次打开弹窗后，绑定内部可能存在的事件
+        bindModalEvents(title);
     }
 
     function closeModal() {
@@ -139,17 +194,33 @@ document.addEventListener('DOMContentLoaded', () => {
             title: '【 系统设置 】',
             html: `
                 <div class="list-layout">
+                    <!-- AI 后端配置区 -->
+                    <div style="text-align:center; color:#c25b4e; font-weight:bold; font-size:14px; margin-bottom:5px;">AI 引擎天道节点配置</div>
+                    
+                    <div class="list-item" style="flex-direction:column; align-items:flex-start;">
+                        <span style="font-size:12px; font-weight:bold; color:#8b7456;">API 地址 (Base URL)</span>
+                        <input type="text" id="api-url" class="setting-input" placeholder="例如: https://api.openai.com/v1" value="\${AIEngine.config.url}">
+                    </div>
+                    
+                    <div class="list-item" style="flex-direction:column; align-items:flex-start;">
+                        <span style="font-size:12px; font-weight:bold; color:#8b7456;">API 密钥 (API Key)</span>
+                        <input type="password" id="api-key" class="setting-input" placeholder="sk-..." value="\${AIEngine.config.key}">
+                    </div>
+                    
+                    <div class="list-item" style="justify-content:space-between; align-items:center;">
+                        <select id="api-model" class="model-select">
+                            \${AIEngine.config.model ? \`<option value="\${AIEngine.config.model}">\${AIEngine.config.model}</option>\` : '<option value="">请先获取模型</option>'}
+                        </select>
+                        <button id="btn-fetch-models" class="action-btn" style="background:#8b7456;">获取</button>
+                    </div>
+
+                    <button id="btn-save-api" class="action-btn" style="width:100%; margin-top:5px; background:#c25b4e; padding:8px;">保存天道配置</button>
+
+                    <div style="border-top:1px dashed #d3c1a8; margin: 15px 0 5px 0;"></div>
+
                     <div class="list-item">
                         <span>背景音乐</span>
                         <button class="action-btn">开启</button>
-                    </div>
-                    <div class="list-item">
-                        <span>音效</span>
-                        <button class="action-btn">开启</button>
-                    </div>
-                    <div class="list-item">
-                        <span>文字速度</span>
-                        <span style="color:#8b7456;">适中</span>
                     </div>
                 </div>
             `
@@ -246,8 +317,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // 4. 绑定所有按钮的点击事件
-    const allButtons = document.querySelectorAll('.icon-btn, .main-btn, .long-btn');
+    const allButtons = document.querySelectorAll('.icon-btn, .main-btn, .long-btn, .grid-cell, .list-item');
     allButtons.forEach(btn => {
+        // 如果是弹窗内部的元素(在动态绑定前已经存在的)，或者是特定的格子，我们在这里拦截
+        if (btn.classList.contains('grid-cell') || btn.classList.contains('list-item')) {
+            return; 
+        }
+
         btn.addEventListener('click', (e) => {
             const btnName = e.currentTarget.textContent.trim();
             const config = modalConfigs[btnName];
@@ -258,6 +334,66 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // 绑定主界面上可能触发AI交互的元素 (例如地图和人际的交互测试)
+    // 监听全局点击事件，捕获动态生成的弹窗内的交互行为
+    document.addEventListener('click', async (e) => {
+        // 匹配地图点击
+        if (e.target.classList.contains('grid-cell') && e.target.textContent !== '空') {
+            const place = e.target.textContent.trim();
+            await handleAIInteraction(`前往 [${place}]`);
+        }
+        
+        // 匹配人际点击 (由于结构嵌套，需要向上找 list-item)
+        const listItem = e.target.closest('.list-item');
+        if (listItem && modalTitle.textContent === '【 人脉交游 】') {
+            const personName = listItem.querySelector('span:first-child').textContent;
+            await handleAIInteraction(`与 [${personName}] 交流`);
+        }
+    });
+
+    // 封装 AI 交互处理
+    async function handleAIInteraction(actionText) {
+        if (!AIEngine.config.url || !AIEngine.config.key || !AIEngine.config.model) {
+            showToast('请先在【设置】中配置并保存天道节点(API)');
+            return;
+        }
+
+        // 先关闭当前弹窗
+        closeModal();
+        showToast(`正在推演: ${actionText}...`);
+
+        try {
+            // 调用隐藏在底层的 AI 引擎
+            const result = await AIEngine.generate(actionText);
+            
+            // 将结果展示在主界面的右侧“今岁推演”面板中
+            const rightPanelContent = document.querySelector('.right-panel .panel-content');
+            if (rightPanelContent) {
+                // 移除之前“诸事尚未落定”的提示词
+                const fadeText = rightPanelContent.querySelector('.fade-text');
+                if (fadeText) fadeText.remove();
+
+                const newEvent = document.createElement('p');
+                newEvent.innerHTML = `<strong style="color:#c25b4e;">[交互] ${actionText}</strong><br>${result}`;
+                
+                // 将新事件追加到面板
+                rightPanelContent.appendChild(newEvent);
+
+                // 重新加上提示词
+                const newFade = document.createElement('p');
+                newFade.className = 'fade-text';
+                newFade.textContent = '岁月流转，前方迷雾重重，诸事尚未落定...';
+                rightPanelContent.appendChild(newFade);
+
+                // 滚动到底部
+                const panel = document.querySelector('.right-panel');
+                panel.scrollTop = panel.scrollHeight;
+            }
+        } catch (err) {
+            showToast(err.message);
+        }
+    }
 
     // 左上角头像点击 -> 触发"我"的弹窗
     const topLeft = document.querySelector('.top-left');
