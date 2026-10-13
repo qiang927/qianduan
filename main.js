@@ -1,4 +1,4 @@
-// 全局游戏与AI配置数据
+    // 全局游戏与AI配置数据
 window.GameData = {
     api: {
         url: 'https://api.openai.com/v1',
@@ -7,7 +7,7 @@ window.GameData = {
         availableModels: []
     },
     user: {
-        prompt: '你出生在一个贫寒的农家，虽身体虚弱，但你渴望通过努力改变命运。请推演我下一年的遭遇。'
+        prompt: '你出生在一个贫寒的农家，虽身体虚弱，但你渴望通过努力改变命运。请推演我接下来的遭遇。'
     },
     world: {
         preset: {
@@ -17,11 +17,25 @@ window.GameData = {
         worldbook: [
             { keys: '大旱,饥荒', content: '当今天下大旱，庄稼绝收，饿殍遍野，难民纷纷涌向京城。', alwaysOn: false }
         ]
+    },
+    time: {
+        year: 1,
+        month: 1,
+        day: 1
     }
 };
 
 // 当前推进的时间刻度 (默认: 年)
-window.GameData.advanceScale = 'year'; 
+window.GameData.advanceScale = 'year';
+
+// 更新游戏时间的显示
+function updateGameTimeDisplay() {
+    const timeDisp = document.getElementById('game-date-display');
+    if (timeDisp) {
+        const { year, month, day } = window.GameData.time;
+        timeDisp.textContent = `第${year}年${month}月${day}日`;
+    }
+} 
 
 document.addEventListener('DOMContentLoaded', () => {
     
@@ -46,7 +60,58 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 2. 弹窗系统核心逻辑
+    // 3. 长按推进按钮逻辑 (下一年/月/日)
+    const nextBtn = document.getElementById('next-year-btn');
+    let pressTimer;
+    let isLongPress = false;
+    const timeModes = [
+        { mode: 'year', label: '下一年' },
+        { mode: 'month', label: '下一月' },
+        { mode: 'day', label: '下一日' }
+    ];
+
+    if (nextBtn) {
+        const updateNextBtnLabel = () => {
+            const current = timeModes.find(m => m.mode === window.GameData.state.timeMode);
+            if (current) nextBtn.textContent = current.label;
+        };
+
+        const toggleTimeMode = () => {
+            const currentIndex = timeModes.findIndex(m => m.mode === window.GameData.state.timeMode);
+            const nextIndex = (currentIndex + 1) % timeModes.length;
+            window.GameData.state.timeMode = timeModes[nextIndex].mode;
+            updateNextBtnLabel();
+            showToast(`已切换推演跨度：${timeModes[nextIndex].label}`);
+        };
+
+        const onTouchStart = (e) => {
+            isLongPress = false;
+            pressTimer = setTimeout(() => {
+                isLongPress = true;
+                toggleTimeMode();
+            }, 600); // 600ms 为长按
+        };
+
+        const onTouchEnd = (e) => {
+            clearTimeout(pressTimer);
+            if (!isLongPress) {
+                // 点击事件：触发原先的"下一年"（现在根据时间跨度动态）的弹窗
+                const config = modalConfigs['推进'];
+                if (config) {
+                    openModal(config.title(), config.html(), config.afterRender);
+                }
+            }
+            if (e && typeof e.preventDefault === 'function') e.preventDefault();
+        };
+
+        nextBtn.addEventListener('mousedown', onTouchStart);
+        nextBtn.addEventListener('mouseup', onTouchEnd);
+        nextBtn.addEventListener('mouseleave', () => clearTimeout(pressTimer));
+        
+        nextBtn.addEventListener('touchstart', onTouchStart, {passive: true});
+        nextBtn.addEventListener('touchend', onTouchEnd);
+    }
+    // 4. 弹窗系统核心逻辑
     const modalOverlay = document.getElementById('custom-modal');
     const modalTitle = document.getElementById('modal-title');
     const modalContentBody = document.getElementById('modal-content-body');
@@ -78,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. 各个按钮的弹窗内容配置
+    // 5. 各个按钮的弹窗内容配置
     const modalConfigs = {
         '设置': {
             title: '【 系统设置 】',
