@@ -166,6 +166,23 @@ html, body {
     color: #ffde59;
 }
 
+/* --- 顶部正中：时间 --- */
+.top-center {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    pointer-events: auto;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
 /* --- 顶部右侧 --- */
 .top-right {
     position: absolute;

@@ -11,7 +11,7 @@ window.GameData = {
     },
     world: {
         preset: {
-            system: '你是一个古代人生模拟器的文字引擎。你需要根据用户的背景设定，以第二人称（你）的视角，输出他新的一年中发生的重要遭遇。',
+            system: '你是一个古代人生模拟器的文字引擎。你需要根据用户的背景设定，以第二人称（你）的视角，输出他在接下来的时间里发生的重要遭遇。',
             postHistory: '文本要求：古风修辞，字数适中（不要超过200字），并且分段叙述。不要带有格式化Markdown符号。'
         },
         worldbook: [
@@ -19,6 +19,9 @@ window.GameData = {
         ]
     }
 };
+
+// 当前推进的时间刻度 (默认: 年)
+window.GameData.advanceScale = 'year'; 
 
 document.addEventListener('DOMContentLoaded', () => {
     
@@ -348,19 +351,29 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         },
         '下一年': {
-            title: '【 岁末交替 】',
-            html: () => `
+            title: '【 岁月流转 】',
+            html: () => {
+                const scaleTextMap = {
+                    'year': '下一年',
+                    'month': '下一月',
+                    'day': '下一日'
+                };
+                const currentScaleText = scaleTextMap[window.GameData.advanceScale];
+                
+                return `
                 <div class="text-center">
-                    <p style="font-size:18px;font-weight:bold;margin-bottom:10px;">准备推演下一年</p>
+                    <p style="font-size:18px;font-weight:bold;margin-bottom:10px;">准备推演${currentScaleText}</p>
                     <p style="margin-bottom:15px;color:#8b7456;font-size:13px;">将根据你当前设定的命格与状态交由 AI 进行推演...</p>
                     <div class="list-layout" style="text-align:left; font-size:12px; background:rgba(0,0,0,0.02); padding:10px; border-radius:4px; border:1px dashed #d3c1a8;">
                         <div><strong>模型:</strong> ${window.GameData.api.model || '未配置'}</div>
                         <div><strong>激活的世界书条目:</strong> 动态匹配</div>
+                        <div><strong>推演跨度:</strong> ${currentScaleText}</div>
                         <div style="margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><strong>推演祈愿:</strong> ${window.GameData.user.prompt}</div>
                     </div>
                     <button class="action-btn" id="btn-trigger-ai" style="margin-top:20px; width:100%; padding:12px; background:#c25b4e; font-size:15px;">🔮 拨动命运之轮</button>
                 </div>
-            `,
+                `;
+            },
             afterRender: () => {
                 document.getElementById('btn-trigger-ai').onclick = async () => {
                     if (!window.GameData.api.key || !window.GameData.api.url || !window.GameData.api.model) {
@@ -379,9 +392,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // 组合 SillyTavern 风格的 Prompt
                     let activeLore = [];
-                    const textToScan = window.GameData.user.prompt; // 实际游玩中应包含最近的对话历史
+                    const textToScan = window.GameData.user.prompt; 
                     
-                    // 扫描世界书条目
                     window.GameData.world.worldbook.forEach(entry => {
                         if (entry.alwaysOn) {
                             activeLore.push(entry.content);
@@ -394,7 +406,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
 
-                    // 组合发送给 AI 的 System Prompt (按照: 角色设定 + 预设 + 世界书 的顺序)
                     let finalSystemContent = `【角色设定】\n${window.GameData.user.prompt}`;
                     
                     if (window.GameData.world.preset.system) {
@@ -408,6 +419,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (window.GameData.world.preset.postHistory) {
                         finalSystemContent += `\n\n【系统附加指令】\n${window.GameData.world.preset.postHistory}`;
                     }
+
+                    // 动态生成 User Prompt
+                    const scaleTextMap = {
+                        'year': '下一年',
+                        'month': '下一月',
+                        'day': '下一日'
+                    };
+                    const userPromptRequest = `请推演我${scaleTextMap[window.GameData.advanceScale]}的遭遇。`;
 
                     // 真实的 Chat Completion 请求
                     try {
@@ -426,7 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     },
                                     {
                                         role: "user",
-                                        content: "请推演我下一年的遭遇。"
+                                        content: userPromptRequest
                                     }
                                 ]
                             })
@@ -564,17 +583,73 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // 4. 绑定所有按钮的点击事件
+    // 4. 绑定所有按钮的点击事件 (含长按逻辑)
     const allButtons = document.querySelectorAll('.icon-btn, .main-btn, .long-btn');
+    
+    // 提取打开面板逻辑为独立函数，以便区分点击和长按
+    function handleBtnAction(btnName) {
+        // 如果是推演按钮，由于名字可能是 下一年/下一月/下一日，映射到同一个面板
+        let configName = btnName;
+        if (['下一年', '下一月', '下一日'].includes(btnName)) {
+            configName = '下一年'; 
+        }
+
+        const config = modalConfigs[configName];
+        if (config) {
+            openModal(config.title, config.html, config.afterRender);
+        } else {
+            openModal('【 提示 】', `<div class="text-center">功能 [${btnName}] 尚未配置。</div>`);
+        }
+    }
+
     allButtons.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const btnName = e.currentTarget.textContent.trim();
-            const config = modalConfigs[btnName];
-            if (config) {
-                openModal(config.title, config.html, config.afterRender);
-            } else {
-                openModal('【 提示 】', `<div class="text-center">功能 [${btnName}] 尚未配置。</div>`);
+        let pressTimer;
+        let isLongPress = false;
+
+        // 鼠标/触摸开始
+        const startPress = (e) => {
+            isLongPress = false;
+            // 只有底部的主推演按钮支持长按切换
+            if (btn.classList.contains('long-btn')) {
+                pressTimer = setTimeout(() => {
+                    isLongPress = true;
+                    
+                    // 切换推演跨度: year -> month -> day -> year
+                    const scaleOrder = ['year', 'month', 'day'];
+                    const btnTextMap = { 'year': '下一年', 'month': '下一月', 'day': '下一日' };
+                    let currentIndex = scaleOrder.indexOf(window.GameData.advanceScale);
+                    let nextIndex = (currentIndex + 1) % scaleOrder.length;
+                    
+                    window.GameData.advanceScale = scaleOrder[nextIndex];
+                    btn.textContent = btnTextMap[window.GameData.advanceScale];
+                    
+                    showToast(`已切换推演跨度: ${btn.textContent}`);
+                    
+                    // 震动反馈 (部分移动端支持)
+                    if (navigator.vibrate) navigator.vibrate(50);
+                    
+                }, 600); // 长按600毫秒触发
             }
+        };
+
+        // 鼠标/触摸结束或离开
+        const endPress = (e) => {
+            clearTimeout(pressTimer);
+        };
+
+        // 绑定事件
+        btn.addEventListener('mousedown', startPress);
+        btn.addEventListener('touchstart', startPress, {passive: true});
+        
+        btn.addEventListener('mouseup', endPress);
+        btn.addEventListener('mouseleave', endPress);
+        btn.addEventListener('touchend', endPress);
+        btn.addEventListener('touchcancel', endPress);
+
+        // 点击事件 (如果是长按触发了，就不再执行点击逻辑)
+        btn.addEventListener('click', (e) => {
+            if (isLongPress) return;
+            handleBtnAction(e.currentTarget.textContent.trim());
         });
     });
 
