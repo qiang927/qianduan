@@ -132,7 +132,7 @@ html, body {
     letter-spacing: 1px;
     white-space: nowrap;
     z-index: 9;
-    max-width: 40vw; 
+    max-width: 35vw; 
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -148,7 +148,7 @@ html, body {
     border-radius: 30px;
     padding: 4px 12px 4px 4px;
     color: #fff;
-    max-width: 35vw; 
+    max-width: 30vw; 
     cursor: pointer; 
     z-index: 10;
 }
