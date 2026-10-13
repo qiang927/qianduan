@@ -18,8 +18,7 @@ window.GameData = {
             { keys: '大旱,饥荒', content: '当今天下大旱，庄稼绝收，饿殍遍野，难民纷纷涌向京城。', alwaysOn: false }
         ],
         regex: [
-            { pattern: '/\\\\*(.*?)\\\\*//g', replacement: '（$1）', active: true },
-            { pattern: '/(\\\\d+)/g', replacement: '【数字:$1】', active: false }
+            { pattern: '/\\*(.*?)\\*/g', replacement: '（$1）', active: true }
         ]
     },
     time: {
@@ -517,7 +516,29 @@ document.addEventListener('DOMContentLoaded', () => {
                         
                         if (data.choices && data.choices[0]) {
                             showToast('推演完成！');
+                            // 获取 AI 回复并应用正则替换
                             let aiText = data.choices[0].message.content;
+                            
+                            if (window.GameData.world.regex && window.GameData.world.regex.length > 0) {
+                                window.GameData.world.regex.forEach(rx => {
+                                    if (rx.active && rx.pattern) {
+                                        try {
+                                            // 解析正则表达式，例如 /pattern/gi 分离出 pattern 和 flags
+                                            const match = rx.pattern.match(/^\/(.*?)\/([gimsuy]*)$/);
+                                            let regexObj;
+                                            if (match) {
+                                                regexObj = new RegExp(match[1], match[2]);
+                                            } else {
+                                                regexObj = new RegExp(rx.pattern, 'g'); // 默认全局替换
+                                            }
+                                            aiText = aiText.replace(regexObj, rx.replacement);
+                                        } catch (e) {
+                                            console.error('正则替换错误:', e, rx);
+                                        }
+                                    }
+                                });
+                            }
+
                             const formattedHtml = aiText.split('\n').filter(p => p.trim() !== '').map(p => `<p>${p}</p>`).join('');
                             
                             if (rightPanelContent) {
