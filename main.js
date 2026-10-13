@@ -19,7 +19,7 @@ window.GameData = {
         ]
     },
     time: {
-        currentStr: '景泰三年 春 一日',
+        currentStr: '景泰三年 五月 初一',
         stepName: '下一年' // 当前的推进跨度，默认下一年
     }
 };
