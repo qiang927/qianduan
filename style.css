@@ -132,7 +132,7 @@ html, body {
     letter-spacing: 1px;
     white-space: nowrap;
     z-index: 10;
-    max-width: 35vw; /* 稍微放宽一点限制，但保证不重叠 */
+    max-width: 30vw; /* 保证三个区域各占不超过约30%，避免重叠 */
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -148,7 +148,7 @@ html, body {
     border-radius: 30px;
     padding: 4px 12px 4px 4px;
     color: #fff;
-    max-width: 28vw; /* 限制左侧宽度，防止和居中重叠 */
+    max-width: 32vw; /* 限制左侧宽度，防止和居中重叠 */
     cursor: pointer; 
     z-index: 10;
 }
