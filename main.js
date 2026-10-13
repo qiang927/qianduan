@@ -5,6 +5,13 @@ window.GameData = {
         key: '',
         model: '',
         availableModels: []
+        time: {
+            year: 3,       // 内部数字表示年份
+            eraName: '景泰',
+            month: 1,
+            day: 1
+        },
+        pushMode: '下一年' // 默认推进模式
     },
     user: {
         prompt: '你出生在一个贫寒的农家，虽身体虚弱，但你渴望通过努力改变命运。请推演我接下来的遭遇。'
@@ -50,6 +57,20 @@ document.addEventListener('DOMContentLoaded', () => {
             toggleMenuBtn.textContent = rightMenu.classList.contains('show') ? '收起' : '展开';
         });
     }
+
+    // 格式化时间的辅助函数
+    function updateTimeDisplay() {
+        const timeObj = window.GameData.api.time;
+        const timeStr = `${timeObj.eraName}${timeObj.year}年 ${timeObj.month}月${timeObj.day}日`;
+        const timeDisplay = document.getElementById('game-time-text');
+        if(timeDisplay) {
+            timeDisplay.textContent = timeStr;
+        }
+        return timeStr;
+    }
+
+    // 初始化时间显示
+    updateTimeDisplay();
 
     document.addEventListener('click', (e) => {
         if (rightMenu && rightMenu.classList.contains('show')) {

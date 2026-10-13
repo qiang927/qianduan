@@ -575,17 +575,19 @@ html, body {
 .resources-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    background: rgba(234, 221, 199, 0.7);
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid #d3c1a8;
+    gap: 8px; /* 间距 */
+    align-items: flex-end;
 }
 
 .resource-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 4px 8px;
+    border-radius: 4px;
     font-size: 14px;
-    color: #4a3c31;
+    color: #5c4a3d;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    width: 90px;
+    border: 1px solid #d3c1a8;
 }
