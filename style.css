@@ -117,10 +117,10 @@ html, body {
     transform: scale(0.92);
 }
 
-/* --- 顶部居中 --- */
+/* --- 顶部中间 --- */
 .top-center {
     position: absolute;
-    top: 25px; /* 下移一点，避开刘海且与左右拉开层次 */
+    top: 15px; /* 与左右对齐 */
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.5);
@@ -132,7 +132,8 @@ html, body {
     letter-spacing: 1px;
     white-space: nowrap;
     z-index: 9;
-    max-width: 35vw; 
+    /* 通过 calc 限制最大宽度，确保不覆盖左右两边 */
+    max-width: calc(100vw - 320px); 
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -148,7 +149,7 @@ html, body {
     border-radius: 30px;
     padding: 4px 12px 4px 4px;
     color: #fff;
-    max-width: 30vw; 
+    max-width: 140px; /* 固定最大宽度 */
     cursor: pointer; 
     z-index: 10;
 }
@@ -196,7 +197,7 @@ html, body {
     flex-direction: column;
     align-items: flex-end;
     gap: 12px; 
-    max-width: 30vw; /* 限制宽度防止重叠 */
+    max-width: 140px; /* 固定最大宽度防止重叠 */
     z-index: 10;
 }
 
