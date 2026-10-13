@@ -538,15 +538,72 @@ document.addEventListener('DOMContentLoaded', () => {
         '地图': {
             title: '【 城镇地图 】',
             html: () => `
-                <div class="grid-layout">
-                    <div class="grid-cell" style="background:#eaddc7;color:#5c4a3d;">自家</div>
-                    <div class="grid-cell">市集</div>
-                    <div class="grid-cell">私塾</div>
-                    <div class="grid-cell">医馆</div>
-                    <div class="grid-cell">破庙</div>
-                    <div class="grid-cell">后山</div>
+                <div class="accordion-container">
+                    
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <span>🏠 自家</span>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-body">
+                            <div class="list-layout" style="margin-top:5px; margin-bottom:5px;">
+                                <div class="list-item" style="padding: 8px;"><span>老父亲</span><button class="action-btn" style="padding:4px 8px; font-size:12px;">拜访</button></div>
+                                <div class="list-item" style="padding: 8px;"><span>慈祥的娘亲</span><button class="action-btn" style="padding:4px 8px; font-size:12px;">拜访</button></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <span>🏮 市集</span>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-body">
+                            <div class="list-layout" style="margin-top:5px; margin-bottom:5px;">
+                                <div class="list-item" style="padding: 8px;"><span>屠户张三</span><button class="action-btn" style="padding:4px 8px; font-size:12px;">拜访</button></div>
+                                <div class="list-item" style="padding: 8px;"><span>卖花姑娘</span><button class="action-btn" style="padding:4px 8px; font-size:12px;">拜访</button></div>
+                                <div class="list-item" style="padding: 8px;"><span>巡街捕快</span><button class="action-btn" style="padding:4px 8px; font-size:12px;">拜访</button></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <span>📜 私塾</span>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-body">
+                            <div class="list-layout" style="margin-top:5px; margin-bottom:5px;">
+                                <div class="list-item" style="padding: 8px;"><span>老先生</span><button class="action-btn" style="padding:4px 8px; font-size:12px;">拜访</button></div>
+                                <div class="list-item" style="padding: 8px;"><span>同窗王胖子</span><button class="action-btn" style="padding:4px 8px; font-size:12px;">拜访</button></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <span>🏚️ 破庙</span>
+                            <span class="accordion-icon">▼</span>
+                        </div>
+                        <div class="accordion-body">
+                            <div class="list-layout" style="margin-top:5px; margin-bottom:5px;">
+                                <div class="list-item" style="padding: 8px;"><span>神秘乞丐</span><button class="action-btn" style="padding:4px 8px; font-size:12px;">拜访</button></div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-            `
+            `,
+            afterRender: () => {
+                // 为地图中的手风琴绑定折叠逻辑
+                const headers = document.querySelectorAll('.accordion-header');
+                headers.forEach(header => {
+                    header.addEventListener('click', () => {
+                        const item = header.parentElement;
+                        item.classList.toggle('open');
+                    });
+                });
+            }
         },
         '任务': {
             title: '【 当前目标 】',
