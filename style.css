@@ -120,7 +120,7 @@ html, body {
 /* --- 顶部居中 --- */
 .top-center {
     position: absolute;
-    top: 15px;
+    top: 25px; /* 下移一点，避开刘海且与左右拉开层次 */
     left: 50%;
     transform: translateX(-50%);
     background: rgba(0, 0, 0, 0.5);
@@ -131,8 +131,8 @@ html, body {
     font-weight: bold;
     letter-spacing: 1px;
     white-space: nowrap;
-    z-index: 10;
-    max-width: 30vw; /* 保证三个区域各占不超过约30%，避免重叠 */
+    z-index: 9;
+    max-width: 40vw; 
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -148,7 +148,7 @@ html, body {
     border-radius: 30px;
     padding: 4px 12px 4px 4px;
     color: #fff;
-    max-width: 32vw; /* 限制左侧宽度，防止和居中重叠 */
+    max-width: 35vw; 
     cursor: pointer; 
     z-index: 10;
 }
