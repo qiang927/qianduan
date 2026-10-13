@@ -200,26 +200,6 @@ html, body {
     z-index: 10;
 }
 
-/* --- 顶部中间 --- */
-.top-center {
-    position: absolute;
-    top: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 20px;
-    padding: 4px 16px;
-    color: #fff;
-    font-size: 13px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    letter-spacing: 1px;
-    white-space: nowrap;
-    z-index: 3;
-}
-
 .resources-wrapper {
     display: flex;
     flex-direction: column;

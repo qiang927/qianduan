@@ -446,7 +446,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
                     // 组合发送给 AI 的 System Prompt (按照: 角色设定 + 预设 + 世界书 的顺序)
-                    let finalSystemContent = `【角色设定】\n${window.GameData.user.prompt}`;
+                    // ===== 正则替换逻辑 (应用给 User Prompt) =====
+                    let processedUserPrompt = window.GameData.user.prompt;
+                    const regexRules = window.GameData.world.regex || [];
+                    
+                    regexRules.forEach(rule => {
+                        if (rule.active && rule.pattern) {
+                            try {
+                                // 解析 "/pattern/flags" 格式
+                                const match = rule.pattern.match(/^\/(.*?)\/([a-z]*)$/);
+                                let regex;
+                                if (match) {
+                                    regex = new RegExp(match[1], match[2]);
+                                } else {
+                                    // 默认作为普通字符串构建全局正则
+                                    regex = new RegExp(rule.pattern, 'g');
+                                }
+                                processedUserPrompt = processedUserPrompt.replace(regex, rule.replacement);
+                            } catch (e) {
+                                console.error('正则规则执行失败:', rule, e);
+                            }
+                        }
+                    });
+                    // ==============================================
+
+                    let finalSystemContent = `【角色设定】\n${processedUserPrompt}`;
                     
                     if (window.GameData.world.preset.system) {
                         finalSystemContent += `\n\n【核心预设】\n${window.GameData.world.preset.system}`;
