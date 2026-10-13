@@ -132,6 +132,9 @@ html, body {
     letter-spacing: 1px;
     white-space: nowrap;
     z-index: 10;
+    max-width: 30vw; /* 限制宽度防止重叠 */
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* --- 顶部左侧 --- */
@@ -145,8 +148,9 @@ html, body {
     border-radius: 30px;
     padding: 4px 12px 4px 4px;
     color: #fff;
-    max-width: 35vw;
+    max-width: 30vw; /* 限制宽度防止重叠 */
     cursor: pointer; 
+    z-index: 10;
 }
 .top-left:active { transform: scale(0.96); }
 
@@ -192,7 +196,8 @@ html, body {
     flex-direction: column;
     align-items: flex-end;
     gap: 12px; 
-    max-width: 35vw;
+    max-width: 30vw; /* 限制宽度防止重叠 */
+    z-index: 10;
 }
 
 /* --- 顶部中间 --- */

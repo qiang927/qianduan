@@ -16,6 +16,9 @@ window.GameData = {
         },
         worldbook: [
             { keys: '大旱,饥荒', content: '当今天下大旱，庄稼绝收，饿殍遍野，难民纷纷涌向京城。', alwaysOn: false }
+        ],
+        regex: [
+            { regex: '\\b你\\b', replacement: '【您】', placement: 'text' }
         ]
     },
     time: {
