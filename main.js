@@ -46,6 +46,15 @@ function updateGameTimeDisplay() {
 
 document.addEventListener('DOMContentLoaded', () => {
     
+    // 初始化时间显示
+    const gameTimeText = document.getElementById('game-time-text');
+    function updateTimeDisplay() {
+        if (gameTimeText) {
+            gameTimeText.textContent = `${window.GameData.time.yearStr} ${window.GameData.time.month}月${window.GameData.time.day}日`;
+        }
+    }
+    updateTimeDisplay();
+    
     // 1. 收纳按钮展开/收起逻辑
     const toggleMenuBtn = document.getElementById('toggle-menu-btn');
     const rightMenu = document.querySelector('.right-menu');
